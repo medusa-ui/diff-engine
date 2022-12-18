@@ -12,6 +12,7 @@ public class Engine {
     public Set<ServerSideDiff> calculate(String oldHTML, String newHTML) {
         List<ServerSideDiff> diffsBefore = new LinkedList<>();
         List<ServerSideDiff> diffsAfter = new LinkedList<>();
+        List<ServerSideDiff> diffsIn = new LinkedList<>();
 
         //TODO - per section
         List<HTMLLayer> oldHTMLLayers = interpretLayer(JOOX.$(oldHTML));
@@ -27,12 +28,11 @@ public class Engine {
             if(indexFound == 0) {
                 //first one, so has to be an add before
                 ServerSideDiff possibleBeforeDiff = checkIfPossibleBeforeDiff(indexFound, newLayer, newHTMLLayers, oldHTMLLayers, 99);
-
-                if(possibleBeforeDiff == null) {
-                    possibleBeforeDiff = ServerSideDiff.buildInDiff(newLayer); //does it make sense to add an in
+                if (possibleBeforeDiff != null) {
+                    diffsBefore.add(possibleBeforeDiff);
+                } else {
+                    diffsIn.add(ServerSideDiff.buildInDiff(newLayer));
                 }
-
-                diffsBefore.add(possibleBeforeDiff);
             } else {
                 //does next (i+1) exist in old? if so add before
                 ServerSideDiff possibleBeforeDiff = checkIfPossibleBeforeDiff(indexFound, newLayer, newHTMLLayers, oldHTMLLayers, 1);
@@ -48,19 +48,19 @@ public class Engine {
                     continue;
                 }
 
-                //if neither exists ... idk yet; could happen if you add multiple items at once?
-                //TODO
-                throw new RuntimeException("Not yet implemented - Unknown scenario - Following an in?");
+                //if neither exists ...; could happen if you add multiple items at once?
+                diffsIn.add(ServerSideDiff.buildInDiff(newLayer));
             }
         }
 
-        //this feels hacky? but reverse it to maintain proper order when adding multiple items
-        //the order of afters should be A - B
-        //the order of before should be B - A (reversed)
+        //maintain proper order when adding multiple items
+        //the order of afters should be B - A (reversed)
+        //the order of before and in should be A - B
         List<ServerSideDiff> diffsAfterReverse = new LinkedList<>(diffsAfter);
-        Collections.reverse(diffsBefore);
-        diffsBefore.addAll(diffsAfterReverse);
-        return new HashSet<>(diffsBefore);
+        Collections.reverse(diffsAfterReverse);
+        diffsBefore.addAll(diffsAfterReverse); //diffsBefore <- diffsAfterReverse
+        diffsIn.addAll(diffsBefore); //diffsIn <- diffsBefore (<- diffsAfterReverse)
+        return new LinkedHashSet<>(diffsIn);
     }
 
     private ServerSideDiff checkIfPossiblePreviousDiff(int indexFound, HTMLLayer newLayer, List<HTMLLayer> newHTMLLayers,
