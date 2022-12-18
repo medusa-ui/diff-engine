@@ -12,11 +12,14 @@ public class HTMLLayer {
     private final String content;
     private final String xpath;
 
+    private final String parentXpath;
+
     public HTMLLayer(Element child) {
         var $child = JOOX.$(child);
         this.hash = child.getNodeName(); //TODO ensure this is unique, but consistent
         this.content = $child.toString();
         this.xpath = $child.xpath();
+        this.parentXpath = $child.parent().xpath();
     }
 
     public String getHash() {
@@ -42,5 +45,9 @@ public class HTMLLayer {
 
     public String getXpath() {
         return xpath;
+    }
+
+    public String getParentXpath() {
+        return parentXpath;
     }
 }

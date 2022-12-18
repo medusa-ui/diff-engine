@@ -29,7 +29,7 @@ public class Engine {
                 ServerSideDiff possibleBeforeDiff = checkIfPossibleBeforeDiff(indexFound, newLayer, newHTMLLayers, oldHTMLLayers, 99);
 
                 if(possibleBeforeDiff == null) {
-                    throw new RuntimeException("Not yet implemented - new item but nothing to reference before - might need a ::first");
+                    possibleBeforeDiff = ServerSideDiff.buildInDiff(newLayer); //does it make sense to add an in
                 }
 
                 diffsBefore.add(possibleBeforeDiff);
@@ -50,17 +50,17 @@ public class Engine {
 
                 //if neither exists ... idk yet; could happen if you add multiple items at once?
                 //TODO
-                throw new RuntimeException("Not yet implemented - Unknown scenario");
+                throw new RuntimeException("Not yet implemented - Unknown scenario - Following an in?");
             }
         }
 
         //this feels hacky? but reverse it to maintain proper order when adding multiple items
-        //the order of before should be A - B
-        //the order of afters should be B - A (reversed)
+        //the order of afters should be A - B
+        //the order of before should be B - A (reversed)
         List<ServerSideDiff> diffsAfterReverse = new LinkedList<>(diffsAfter);
-        Collections.reverse(diffsAfterReverse);
-        diffsAfterReverse.addAll(diffsBefore);
-        return new HashSet<>(diffsAfterReverse);
+        Collections.reverse(diffsBefore);
+        diffsBefore.addAll(diffsAfterReverse);
+        return new HashSet<>(diffsBefore);
     }
 
     private ServerSideDiff checkIfPossiblePreviousDiff(int indexFound, HTMLLayer newLayer, List<HTMLLayer> newHTMLLayers,

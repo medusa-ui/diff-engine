@@ -14,6 +14,9 @@ public class DiffEngineTestAdditionLogic {
         } else if(diff.getAfter() != null) {
             Element matchingAfterElement = xpath(html, diff.getAfter());
             matchingAfterElement.after(diff.getContent());
+        } else if(diff.getIn() != null) {
+            Element matchingParentElement = xpath(html, diff.getIn());
+            matchingParentElement.append(diff.getContent());
         }
         return html;
     }

@@ -73,4 +73,29 @@ class TestEngineAdditionsTest extends DiffEngineTest {
         diffs.add(diff);
         applyAndTest(oldHTML, newHTML, diffs);
     }
+
+    private static Stream<Arguments> additionWithinParameters() {
+        return Stream.of(Arguments.of(
+                """
+                        <section>
+                        </section>
+                        """,
+                """
+                <section>
+                    <p>1</p>
+                </section>
+                """
+        ));
+    }
+
+    @ParameterizedTest
+    @MethodSource("additionWithinParameters")
+    void testWithinAdditions(String oldHTML, String newHTML) {
+        Set<ServerSideDiff> diffs = new LinkedHashSet<>();
+        ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
+        diff.setIn("/html[1]/body[1]/section[1]");
+        diff.setContent("<p>1</p>");
+        diffs.add(diff);
+        applyAndTest(oldHTML, newHTML, diffs);
+    }
 }

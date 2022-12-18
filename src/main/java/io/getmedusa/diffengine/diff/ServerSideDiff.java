@@ -7,6 +7,7 @@ public class ServerSideDiff {
     private String content;
     private String before;
     private String after;
+    private String in;
 
     private final DiffType type;
 
@@ -38,6 +39,14 @@ public class ServerSideDiff {
         this.after = after;
     }
 
+    public String getIn() {
+        return in;
+    }
+
+    public void setIn(String in) {
+        this.in = in;
+    }
+
     public boolean isAddition() {
         return this.type.equals(DiffType.ADDITION);
     }
@@ -53,6 +62,13 @@ public class ServerSideDiff {
         ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
         diff.setContent(newLayer.getContent());
         diff.setBefore(addBeforeThisLayer.getXpath());
+        return diff;
+    }
+
+    public static ServerSideDiff buildInDiff(HTMLLayer layer) {
+        ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
+        diff.setContent(layer.getContent());
+        diff.setIn(layer.getParentXpath());
         return diff;
     }
 
@@ -72,8 +88,9 @@ public class ServerSideDiff {
     public String toString() {
         return "ServerSideDiff{" +
                 "content='" + content + '\'' +
-                ", before='" + before + '\'' +
-                ", after='" + after + '\'' +
+                ((before != null) ? (", before='" + before + '\'') : "") +
+                ((after != null) ? (", after='" + after + '\'') : "") +
+                ((in != null) ? (", in='" + in + '\'') : "") +
                 ", type=" + type +
                 '}';
     }
