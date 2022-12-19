@@ -10,13 +10,27 @@ import java.util.*;
 public class Engine {
 
     public Set<ServerSideDiff> calculate(String oldHTML, String newHTML) {
+        Map<Integer, List<HTMLLayer>> oldHTMLLayersMap = interpretLayer(JOOX.$(oldHTML));
+        Map<Integer, List<HTMLLayer>> newHTMLLayersMap = interpretLayer(JOOX.$(newHTML));
+
+        Set<Integer> layers = new TreeSet<>(oldHTMLLayersMap.keySet());
+        layers.addAll(newHTMLLayersMap.keySet());
+
+        Set<ServerSideDiff> diffs = new LinkedHashSet<>();
+        for(int layer : layers) {
+            var diffsForOneLayer = calculateForLayer(oldHTMLLayersMap, newHTMLLayersMap, layer);
+            diffs.addAll(diffsForOneLayer);
+        }
+        return diffs;
+    }
+
+    private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer) {
         List<ServerSideDiff> diffsBefore = new LinkedList<>();
         List<ServerSideDiff> diffsAfter = new LinkedList<>();
         List<ServerSideDiff> diffsIn = new LinkedList<>();
 
-        //TODO - per section
-        List<HTMLLayer> oldHTMLLayers = interpretLayer(JOOX.$(oldHTML));
-        List<HTMLLayer> newHTMLLayers = interpretLayer(JOOX.$(newHTML));
+        List<HTMLLayer> oldHTMLLayers = oldHTMLLayersMap.get(layer);
+        List<HTMLLayer> newHTMLLayers = newHTMLLayersMap.get(layer);
 
         //find addition
         List<HTMLLayer> didntExistBefore = new LinkedList<>(newHTMLLayers);
@@ -60,6 +74,7 @@ public class Engine {
         Collections.reverse(diffsAfterReverse);
         diffsBefore.addAll(diffsAfterReverse); //diffsBefore <- diffsAfterReverse
         diffsIn.addAll(diffsBefore); //diffsIn <- diffsBefore (<- diffsAfterReverse)
+
         return new LinkedHashSet<>(diffsIn);
     }
 
@@ -103,12 +118,23 @@ public class Engine {
         return -1;
     }
 
-    private static List<HTMLLayer> interpretLayer(Match match) {
+    private static Map<Integer, List<HTMLLayer>> interpretLayer(Match match) {
+        Map<Integer, List<HTMLLayer>> layerMap = new HashMap<>();
+        layerMap.put(1, List.of(new HTMLLayer(match)));
+        recursive(match, layerMap, 2);
+        return layerMap;
+    }
+
+    private static void recursive(Match match, Map<Integer, List<HTMLLayer>> map, int layer) {
         List<HTMLLayer> layers = new LinkedList<>();
         for (var child : match.children()) {
-            layers.add(new HTMLLayer(child));
+            var $child = JOOX.$(child);
+            layers.add(new HTMLLayer($child));
+            if($child.children().isNotEmpty()) {
+                recursive($child, map, layer + 1);
+            }
         }
-        return layers;
+        map.put(layer, layers);
     }
 
 }

@@ -1,6 +1,6 @@
 package io.getmedusa.diffengine.model;
 
-import org.joox.JOOX;
+import org.joox.Match;
 import org.w3c.dom.Element;
 
 import java.util.Objects;
@@ -14,9 +14,20 @@ public class HTMLLayer {
 
     private final String parentXpath;
 
-    public HTMLLayer(Element child) {
-        var $child = JOOX.$(child);
-        this.hash = child.getNodeName(); //TODO ensure this is unique, but consistent
+    public HTMLLayer(Match $child) {
+        Element element = $child.get(0);
+        StringBuilder hashBuilder = new StringBuilder(element.getNodeName());
+        for (int i = 0; i < element.getAttributes().getLength(); i++) {
+            var attr = element.getAttributes().item(i);
+            hashBuilder.append("/").append(attr.getNodeName()).append(attr.getNodeValue());
+        }
+        if($child.child().isEmpty()) {
+            hashBuilder.append("-").append($child.text().hashCode());
+        } else {
+            hashBuilder.append("::empty");
+        }
+        this.hash = hashBuilder.toString();
+        //TODO ensure this is unique, but consistent; xpath is not a good choice because that doesn't describe it as the same node
         this.content = $child.toString();
         this.xpath = $child.xpath();
         this.parentXpath = $child.parent().xpath();
