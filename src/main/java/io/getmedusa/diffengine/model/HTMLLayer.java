@@ -30,7 +30,12 @@ public class HTMLLayer {
         //TODO ensure this is unique, but consistent; xpath is not a good choice because that doesn't describe it as the same node
         this.content = $child.toString();
         this.xpath = $child.xpath();
-        this.parentXpath = $child.parent().xpath();
+        String parent = $child.parent().xpath();
+        if(parent == null) {
+            parent = xpath;
+        }
+        this.parentXpath = parent;
+
     }
 
     public String getHash() {

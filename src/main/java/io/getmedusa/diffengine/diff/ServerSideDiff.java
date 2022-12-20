@@ -1,6 +1,7 @@
 package io.getmedusa.diffengine.diff;
 
 import io.getmedusa.diffengine.model.HTMLLayer;
+import org.joox.JOOX;
 
 public class ServerSideDiff {
 
@@ -67,7 +68,7 @@ public class ServerSideDiff {
 
     public static ServerSideDiff buildInDiff(HTMLLayer layer) {
         ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
-        diff.setContent(layer.getContent());
+        diff.setContent(JOOX.$(layer.getContent()).content());
         diff.setIn(layer.getParentXpath());
         return diff;
     }

@@ -17,24 +17,24 @@ public class Engine {
         layers.addAll(newHTMLLayersMap.keySet());
 
         Set<ServerSideDiff> diffs = new LinkedHashSet<>();
+        List<String> alreadyUsedPaths = new ArrayList<>();
         for(int layer : layers) {
-            var diffsForOneLayer = calculateForLayer(oldHTMLLayersMap, newHTMLLayersMap, layer);
+            var diffsForOneLayer = calculateForLayer(oldHTMLLayersMap, newHTMLLayersMap, layer, alreadyUsedPaths);
             diffs.addAll(diffsForOneLayer);
         }
         return diffs;
     }
 
-    private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer) {
+    private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer, List<String> alreadyUsedPaths) {
         List<ServerSideDiff> diffsBefore = new LinkedList<>();
         List<ServerSideDiff> diffsAfter = new LinkedList<>();
         List<ServerSideDiff> diffsIn = new LinkedList<>();
 
-        List<HTMLLayer> oldHTMLLayers = oldHTMLLayersMap.get(layer);
-        List<HTMLLayer> newHTMLLayers = newHTMLLayersMap.get(layer);
+        List<HTMLLayer> oldHTMLLayers = oldHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
+        List<HTMLLayer> newHTMLLayers = newHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
 
         //find addition
-        List<HTMLLayer> didntExistBefore = new LinkedList<>(newHTMLLayers);
-        oldHTMLLayers.forEach(didntExistBefore::remove);
+        List<HTMLLayer> didntExistBefore = calculateWhichLayersDidNotExistBefore(oldHTMLLayers, newHTMLLayers, alreadyUsedPaths);
 
         //find where they get added (before/after)
         for(HTMLLayer newLayer : didntExistBefore) {
@@ -76,6 +76,33 @@ public class Engine {
         diffsIn.addAll(diffsBefore); //diffsIn <- diffsBefore (<- diffsAfterReverse)
 
         return new LinkedHashSet<>(diffsIn);
+    }
+
+    private static List<HTMLLayer> calculateWhichLayersDidNotExistBefore(List<HTMLLayer> oldLayers, List<HTMLLayer> newLayers, List<String> alreadyUsedPaths) {
+        List<HTMLLayer> didntExistBefore = new LinkedList<>(newLayers);
+        oldLayers.forEach(didntExistBefore::remove);
+        removeAlreadyUsedPaths(alreadyUsedPaths, didntExistBefore);
+        alreadyUsedPaths.addAll(didntExistBefore.stream().map(HTMLLayer::getXpath).toList());
+        return didntExistBefore;
+    }
+
+    private static void removeAlreadyUsedPaths(List<String> alreadyUsedPaths, List<HTMLLayer> didntExistBefore) {
+        List<HTMLLayer> toIgnore = new ArrayList<>();
+        for(var newAddition : didntExistBefore) {
+            if(pathWasAlreadyUsed(newAddition.getXpath(), alreadyUsedPaths)) {
+                toIgnore.add(newAddition);
+            }
+        }
+        toIgnore.forEach(didntExistBefore::remove);
+    }
+
+    private static boolean pathWasAlreadyUsed(String xpath, List<String> alreadyUsedPaths) {
+        for(var usedPath : alreadyUsedPaths) {
+            if(xpath.startsWith(usedPath)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ServerSideDiff checkIfPossiblePreviousDiff(int indexFound, HTMLLayer newLayer, List<HTMLLayer> newHTMLLayers,

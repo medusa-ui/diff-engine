@@ -28,6 +28,41 @@ class NestedLayerSimpleAdditionsTest extends DiffEngineTest {
                             </div>
                         </section>
                         """
+                ),Arguments.of(
+                """
+                        <section>
+                            <div>
+                            </div>
+                        </section>
+                        """,
+                        """
+                        <section>
+                            <p>A</p>
+                            <div>
+                                <p>1</p>
+                            </div>
+                            <p>B</p>
+                        </section>
+                        """
+                ),Arguments.of(
+                        """
+                                <section>
+                                    <div>
+                                        <p>1</p>
+                                    </div>
+                                </section>
+                                """,
+                        """
+                        <section>
+                            <div>
+                                <p>1</p>
+                                <p>2</p>
+                                <p>3 <span>A</span></p>
+                                <p>4</p>
+                                <p>5</p>
+                            </div>
+                        </section>
+                        """
                 ));
     }
 
