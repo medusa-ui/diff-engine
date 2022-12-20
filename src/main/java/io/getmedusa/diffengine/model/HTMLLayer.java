@@ -21,11 +21,8 @@ public class HTMLLayer {
             var attr = element.getAttributes().item(i);
             hashBuilder.append("/").append(attr.getNodeName()).append(attr.getNodeValue());
         }
-        if($child.child().isEmpty()) {
-            hashBuilder.append("-").append($child.text().hashCode());
-        } else {
-            hashBuilder.append("::empty");
-        }
+        String[] xpathSplit = $child.xpath().split("/");
+        hashBuilder.append(xpathSplit[xpathSplit.length-1]);
         this.hash = hashBuilder.toString();
         //TODO ensure this is unique, but consistent; xpath is not a good choice because that doesn't describe it as the same node
         this.content = $child.toString();

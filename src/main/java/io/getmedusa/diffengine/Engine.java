@@ -26,14 +26,32 @@ public class Engine {
     }
 
     private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer, List<String> alreadyUsedPaths) {
+        List<HTMLLayer> oldHTMLLayers = oldHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
+        List<HTMLLayer> newHTMLLayers = newHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
+
+        LinkedHashSet<ServerSideDiff> diffs = findAdditions(alreadyUsedPaths, oldHTMLLayers, newHTMLLayers);
+        diffs.addAll(findRemovals(oldHTMLLayers, newHTMLLayers, alreadyUsedPaths));
+        return diffs;
+    }
+
+    private LinkedHashSet<ServerSideDiff> findRemovals(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers, List<String> alreadyUsedPaths) {
+        List<HTMLLayer> doesntExistAnyMore = calculateWhichLayersDidNotExistBefore(newHTMLLayers, oldHTMLLayers, new ArrayList<>());
+
+        List<ServerSideDiff> diffsRemove = new LinkedList<>();
+        for(HTMLLayer removeLayer : doesntExistAnyMore) {
+            if(!alreadyUsedPaths.contains(removeLayer.getXpath())) {
+                diffsRemove.add(ServerSideDiff.buildRemoval(removeLayer));
+            }
+        }
+
+        return new LinkedHashSet<>(diffsRemove);
+    }
+
+    private LinkedHashSet<ServerSideDiff> findAdditions(List<String> alreadyUsedPaths, List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
         List<ServerSideDiff> diffsBefore = new LinkedList<>();
         List<ServerSideDiff> diffsAfter = new LinkedList<>();
         List<ServerSideDiff> diffsIn = new LinkedList<>();
 
-        List<HTMLLayer> oldHTMLLayers = oldHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
-        List<HTMLLayer> newHTMLLayers = newHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
-
-        //find addition
         List<HTMLLayer> didntExistBefore = calculateWhichLayersDidNotExistBefore(oldHTMLLayers, newHTMLLayers, alreadyUsedPaths);
 
         //find where they get added (before/after)

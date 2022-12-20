@@ -3,6 +3,7 @@ package io.getmedusa.diffengine.testengine;
 import io.getmedusa.diffengine.Engine;
 import io.getmedusa.diffengine.diff.ServerSideDiff;
 import io.getmedusa.diffengine.testengine.meta.DiffEngineTestAdditionLogic;
+import io.getmedusa.diffengine.testengine.meta.DiffEngineTestRemovalLogic;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Assertions;
@@ -21,12 +22,10 @@ public abstract class DiffEngineTest {
         Assertions.assertTrue(diffs.size() >= 1, "Expected at least 1 diff");
 
         Document html = Jsoup.parse(oldHTML);
-        System.out.println(html);
 
         for(ServerSideDiff diff : diffs) {
             System.out.println(diff);
             html = applyDiff(html, diff);
-            System.out.println(html);
         }
 
         Document expectedHTML = Jsoup.parse(newHTML);
@@ -37,6 +36,8 @@ public abstract class DiffEngineTest {
     private Document applyDiff(Document html, ServerSideDiff diff) {
         if(diff.isAddition()) {
             return DiffEngineTestAdditionLogic.applyAddition(html, diff);
+        } else if(diff.isRemoval()) {
+            return DiffEngineTestRemovalLogic.applyRemoval(html, diff);
         }
         return html;
     }
