@@ -68,8 +68,14 @@ public class ServerSideDiff {
 
     public static ServerSideDiff buildInDiff(HTMLLayer layer) {
         ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
-        diff.setContent(JOOX.$(layer.getContent()).content());
-        diff.setIn(layer.getParentXpath());
+        if(layer.getParentXpath() != null) {
+            diff.setContent(layer.getContent());
+            diff.setIn(layer.getParentXpath());
+        } else {
+            diff.setContent(JOOX.$(layer.getContent()).content());
+            diff.setIn(layer.getXpath());
+        }
+
         return diff;
     }
 

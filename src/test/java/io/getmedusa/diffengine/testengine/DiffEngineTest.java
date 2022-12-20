@@ -21,10 +21,12 @@ public abstract class DiffEngineTest {
         Assertions.assertTrue(diffs.size() >= 1, "Expected at least 1 diff");
 
         Document html = Jsoup.parse(oldHTML);
+        System.out.println(html);
 
         for(ServerSideDiff diff : diffs) {
             System.out.println(diff);
             html = applyDiff(html, diff);
+            System.out.println(html);
         }
 
         Document expectedHTML = Jsoup.parse(newHTML);
