@@ -66,8 +66,8 @@ class NestedLayerSimpleAdditionsTest extends DiffEngineTest {
                     <section>
                      <div></div>
                     </section>
-                        """,
-                """
+                    """,
+                    """
                     <section>
                      <div><p></p></div>
                      <div></div>
@@ -91,24 +91,18 @@ class NestedLayerSimpleAdditionsTest extends DiffEngineTest {
                 """
         ),Arguments.of(
                 """
-                            <section>
-                             <h5></h5>
+                            <parent>
                              <p></p>
                              <div></div>
-                             <h5></h5>
-                             <p></p>
-                            </section>
+                            </parent>
                         """,
                         """
-                        <section>
-                         <h5></h5>
-                         <div><p></p></div>
+                        <parent>
+                         <div></div>
                          <p></p>
                          <div></div>
-                         <h5></h5>
-                         <div><p></p></div>
-                         <p></p>
-                        </section>
+                         <div></div>
+                        </parent>
                 """
         ));
     }

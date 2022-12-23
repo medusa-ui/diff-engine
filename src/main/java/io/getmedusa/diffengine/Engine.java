@@ -1,5 +1,8 @@
 package io.getmedusa.diffengine;
 
+import com.github.difflib.DiffUtils;
+import com.github.difflib.patch.DeltaType;
+import com.github.difflib.patch.Patch;
 import io.getmedusa.diffengine.diff.ServerSideDiff;
 import io.getmedusa.diffengine.model.HTMLLayer;
 import org.joox.JOOX;
@@ -28,16 +31,59 @@ public class Engine {
     private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer, List<String> alreadyUsedPaths) {
         List<HTMLLayer> oldHTMLLayers = oldHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
         List<HTMLLayer> newHTMLLayers = newHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
-        /*
-        System.out.println(layer);
-        System.out.println(oldHTMLLayers);
-        System.out.println(newHTMLLayers);
-        System.out.println();
-        */
-        LinkedHashSet<ServerSideDiff> diffs = findAdditions(oldHTMLLayers, newHTMLLayers);
-        diffs.addAll(findRemovals(oldHTMLLayers, newHTMLLayers));
-        diffs.addAll(findEdits(oldHTMLLayers, newHTMLLayers));
+
+        LinkedHashSet<ServerSideDiff> diffs = new LinkedHashSet<>();
+
+        LinkedList<HTMLLayer> buildup = new LinkedList<>(oldHTMLLayers);
+
+        boolean moreDiffsAvailable = true;
+        while (moreDiffsAvailable) {
+            ServerSideDiff diff = recurringPatch(buildup,newHTMLLayers);
+            if(diff == null) {
+                moreDiffsAvailable = false;
+            } else {
+                diffs.add(diff);
+            }
+        }
+
         return diffs;
+    }
+
+    private ServerSideDiff recurringPatch(LinkedList<HTMLLayer> buildup, List<HTMLLayer> newHTMLLayers) {
+        Patch<HTMLLayer> patch = DiffUtils.diff(buildup, newHTMLLayers);
+        if(!patch.getDeltas().isEmpty()) {
+            var delta = patch.getDeltas().get(0);
+            System.out.println(delta);
+
+            if(DeltaType.DELETE.equals(delta.getType())) {
+                final int indexToRemove = delta.getSource().getPosition();
+                final HTMLLayer layerToRemove = buildup.get(indexToRemove);
+
+                buildup.remove(layerToRemove);
+                return ServerSideDiff.buildRemoval(layerToRemove);
+            } else if(DeltaType.INSERT.equals(delta.getType())) {
+                HTMLLayer layerToAdd = delta.getTarget().getLines().get(0);
+                int indexPosition = delta.getSource().getPosition();
+
+                final ServerSideDiff diff;
+
+                if (indexPosition == buildup.size()) {
+                    //linkLast(layerToAdd);
+                    if(!buildup.isEmpty()) {
+                        diff = ServerSideDiff.buildNewAfterDiff(layerToAdd, buildup.getLast());
+                    } else {
+                        diff = ServerSideDiff.buildInDiff(layerToAdd);
+                    }
+                } else {
+                    //linkBefore(layerToAdd, node(indexPosition));
+                    diff = ServerSideDiff.buildNewBeforeDiff(layerToAdd, buildup.get(indexPosition));
+                }
+
+                buildup.add(indexPosition, layerToAdd);
+                return diff;
+            }
+        }
+        return null;
     }
 
     private Set<ServerSideDiff> findEdits(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
@@ -56,122 +102,6 @@ public class Engine {
 
     private boolean layerContentIsLimitedToLayer(HTMLLayer layer) {
         return JOOX.$(layer.getContent()).children().isEmpty();
-    }
-
-    private LinkedHashSet<ServerSideDiff> findRemovals(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
-        List<HTMLLayer> doesntExistAnyMore = calculateWhichLayersDidNotExistBefore(newHTMLLayers, oldHTMLLayers);
-
-        List<ServerSideDiff> diffsRemove = new LinkedList<>();
-        for(HTMLLayer removeLayer : doesntExistAnyMore) {
-            diffsRemove.add(ServerSideDiff.buildRemoval(removeLayer));
-        }
-
-        return new LinkedHashSet<>(diffsRemove);
-    }
-
-    private LinkedHashSet<ServerSideDiff> findAdditions(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
-        List<ServerSideDiff> diffsBefore = new LinkedList<>();
-        List<ServerSideDiff> diffsAfter = new LinkedList<>();
-        List<ServerSideDiff> diffsIn = new LinkedList<>();
-
-        List<HTMLLayer> didntExistBefore = calculateWhichLayersDidNotExistBefore(oldHTMLLayers, newHTMLLayers);
-
-        //find where they get added (before/after)
-        for(HTMLLayer newLayer : didntExistBefore) {
-            int indexFound = findMatch(newLayer, newHTMLLayers);
-            if(indexFound == 0) {
-                //first one, so has to be an add before
-                ServerSideDiff possibleBeforeDiff = checkIfPossibleBeforeDiff(indexFound, newLayer, newHTMLLayers, oldHTMLLayers, 99);
-                if (possibleBeforeDiff != null) {
-                    diffsBefore.add(possibleBeforeDiff);
-                } else {
-                    diffsIn.add(ServerSideDiff.buildInDiff(newLayer));
-                }
-            } else {
-                //does next (i+1) exist in old? if so add before
-                ServerSideDiff possibleBeforeDiff = checkIfPossibleBeforeDiff(indexFound, newLayer, newHTMLLayers, oldHTMLLayers, 1);
-                if(null != possibleBeforeDiff) {
-                    diffsBefore.add(possibleBeforeDiff);
-                    continue;
-                }
-
-                //does previous (i-1) exist in old? if so add after
-                ServerSideDiff possiblePreviousDiff = checkIfPossiblePreviousDiff(indexFound, newLayer, newHTMLLayers, oldHTMLLayers, 99);
-                if(null != possiblePreviousDiff) {
-                    diffsAfter.add(possiblePreviousDiff);
-                    continue;
-                }
-
-                //if neither exists ...; could happen if you add multiple items at once?
-                diffsIn.add(ServerSideDiff.buildInDiff(newLayer));
-            }
-        }
-
-        //maintain proper order when adding multiple items
-        //the order of afters should be B - A (reversed)
-        //the order of before and in should be A - B
-        List<ServerSideDiff> diffsAfterReverse = new LinkedList<>(diffsAfter);
-        Collections.reverse(diffsAfterReverse);
-        diffsBefore.addAll(diffsAfterReverse); //diffsBefore <- diffsAfterReverse
-        diffsIn.addAll(diffsBefore); //diffsIn <- diffsBefore (<- diffsAfterReverse)
-
-        return new LinkedHashSet<>(diffsIn);
-    }
-
-    private static List<HTMLLayer> calculateWhichLayersDidNotExistBefore(List<HTMLLayer> oldLayers, List<HTMLLayer> newLayers) {
-        List<HTMLLayer> didntExistBefore = new LinkedList<>(newLayers);
-        oldLayers.forEach(didntExistBefore::remove);
-        return didntExistBefore;
-    }
-
-    private static void removeAlreadyUsedPaths(List<String> alreadyUsedPaths, List<HTMLLayer> didntExistBefore) {
-        List<HTMLLayer> toIgnore = new ArrayList<>();
-        for(var newAddition : didntExistBefore) {
-            if(pathWasAlreadyUsed(newAddition.getXpath(), alreadyUsedPaths)) {
-                toIgnore.add(newAddition);
-            }
-        }
-        toIgnore.forEach(didntExistBefore::remove);
-    }
-
-    private static boolean pathWasAlreadyUsed(String xpath, List<String> alreadyUsedPaths) {
-        for(var usedPath : alreadyUsedPaths) {
-            if(xpath.startsWith(usedPath)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private ServerSideDiff checkIfPossiblePreviousDiff(int indexFound, HTMLLayer newLayer, List<HTMLLayer> newHTMLLayers,
-                                                       List<HTMLLayer> oldHTMLLayers, int maxDepth) {
-        if(indexFound-1 < 0 || maxDepth == 0) {
-            return null;
-        }
-        final HTMLLayer previous = newHTMLLayers.get(indexFound - 1);
-        int indexPrevInOld = findMatch(previous, oldHTMLLayers);
-        if(-1 != indexPrevInOld) {
-            //add after
-            return ServerSideDiff.buildNewAfterDiff(newLayer, oldHTMLLayers.get(indexPrevInOld));
-        } else {
-            return checkIfPossiblePreviousDiff(--indexFound, newLayer, newHTMLLayers, oldHTMLLayers, --maxDepth);
-        }
-    }
-
-    private ServerSideDiff checkIfPossibleBeforeDiff(int indexFound, HTMLLayer newLayer, List<HTMLLayer> newHTMLLayers,
-                                                     List<HTMLLayer> oldHTMLLayers, int maxDepth) {
-        if(newHTMLLayers.size() <= (indexFound + 1) || maxDepth == 0) {
-            return null;
-        }
-
-        final HTMLLayer next = newHTMLLayers.get(indexFound + 1);
-        int indexNextInOld = findMatch(next, oldHTMLLayers);
-        if(-1 != indexNextInOld) {
-            //add before
-            return ServerSideDiff.buildNewBeforeDiff(newLayer, oldHTMLLayers.get(indexNextInOld));
-        } else {
-            return checkIfPossibleBeforeDiff(++indexFound, newLayer, newHTMLLayers, oldHTMLLayers, --maxDepth);
-        }
     }
 
     private static int findMatch(HTMLLayer layerToMatch, List<HTMLLayer> listToMatchIn) {
