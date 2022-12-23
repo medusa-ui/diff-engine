@@ -16,23 +16,23 @@ class OneLayerSimpleRemovalTest extends DiffEngineTest {
                 """
                         <section>
                             <div>
-                                <p>1</p>
-                                <p>2</p>
+                                <p></p>
+                                <p></p>
                             </div>
                         </section>
                         """,
-                """
-                <section>
-                    <div>
-                        <p>1</p>
-                    </div>
-                </section>
-                """
-        ),Arguments.of(
+                        """
+                        <section>
+                            <div>
+                                <p></p>
+                            </div>
+                        </section>
+                        """
+                ),Arguments.of(
                 """
                         <section>
                             <div>
-                                <p>2</p>
+                                <p></p>
                             </div>
                         </section>
                         """,
@@ -42,7 +42,7 @@ class OneLayerSimpleRemovalTest extends DiffEngineTest {
                             </div>
                         </section>
                         """
-                ));
+                        ));
     }
 
     @ParameterizedTest

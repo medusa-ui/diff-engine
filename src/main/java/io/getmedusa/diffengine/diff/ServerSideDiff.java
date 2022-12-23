@@ -68,6 +68,17 @@ public class ServerSideDiff {
         return this.type.equals(DiffType.REMOVAL);
     }
 
+    public boolean isEdit() {
+        return this.type.equals(DiffType.EDIT);
+    }
+
+    public static ServerSideDiff buildEdit(HTMLLayer newLayer) {
+        ServerSideDiff diff = new ServerSideDiff(DiffType.EDIT);
+        diff.setContent(JOOX.$(newLayer.getContent()).text());
+        diff.setXpath(newLayer.getXpath());
+        return diff;
+    }
+
     public static ServerSideDiff buildNewAfterDiff(HTMLLayer newLayer, HTMLLayer addAfterThisLayer) {
         ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
         diff.setContent(newLayer.getContent());
@@ -104,7 +115,8 @@ public class ServerSideDiff {
     public enum DiffType {
         ADDITION,
         REMOVAL,
-        /*EDIT,
+        EDIT
+        /*,
         ATTR_CHANGE,
         TAG_CHANGE,
         REDIRECT,

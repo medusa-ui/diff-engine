@@ -31,7 +31,26 @@ public class Engine {
 
         LinkedHashSet<ServerSideDiff> diffs = findAdditions(alreadyUsedPaths, oldHTMLLayers, newHTMLLayers);
         diffs.addAll(findRemovals(oldHTMLLayers, newHTMLLayers, alreadyUsedPaths));
+        diffs.addAll(findEdits(oldHTMLLayers, newHTMLLayers));
         return diffs;
+    }
+
+    private Set<ServerSideDiff> findEdits(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
+        Set<ServerSideDiff> diffs = new LinkedHashSet<>();
+        for(HTMLLayer newLayer : newHTMLLayers) {
+            int index = findMatch(newLayer, oldHTMLLayers);
+            if(-1 != index && layerContentIsLimitedToLayer(newLayer)) {
+                HTMLLayer layer = oldHTMLLayers.get(index);
+                if (layerContentIsLimitedToLayer(layer) && !newLayer.getContent().equals(layer.getContent())) {
+                    diffs.add(ServerSideDiff.buildEdit(newLayer));
+                }
+            }
+        }
+        return diffs;
+    }
+
+    private boolean layerContentIsLimitedToLayer(HTMLLayer layer) {
+        return JOOX.$(layer.getContent()).children().isEmpty();
     }
 
     private LinkedHashSet<ServerSideDiff> findRemovals(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers, List<String> alreadyUsedPaths) {

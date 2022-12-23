@@ -16,15 +16,15 @@ class NestedLayerSimpleAdditionsTest extends DiffEngineTest {
                 """
                         <section>
                             <div>
-                                <p>1</p>
+                                <p></p>
                             </div>
                         </section>
                         """,
                         """
                         <section>
                             <div>
-                                <p>1</p>
-                                <p>2</p>
+                                <p></p>
+                                <p></p>
                             </div>
                         </section>
                         """
@@ -35,29 +35,29 @@ class NestedLayerSimpleAdditionsTest extends DiffEngineTest {
                         """,
                         """
                         <section>
-                            <p>A</p>
+                            <p></p>
                             <div>
-                                <p>1</p>
+                                <p></p>
                             </div>
-                            <p>B</p>
+                            <p></p>
                         </section>
                         """
                 ),Arguments.of(
                 """
                         <section>
                             <div>
-                                <p>1</p>
+                                <p></p>
                             </div>
                         </section>
                         """,
                         """
                         <section>
                             <div>
-                                <p>1</p>
-                                <p>2</p>
-                                <p>3 <span>A</span></p>
-                                <p>4</p>
-                                <p>5</p>
+                                <p></p>
+                                <p></p>
+                                <p><span></span></p>
+                                <p></p>
+                                <p></p>
                             </div>
                         </section>
                         """

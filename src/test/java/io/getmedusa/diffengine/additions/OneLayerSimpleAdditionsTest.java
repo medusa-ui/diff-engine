@@ -15,87 +15,87 @@ class OneLayerSimpleAdditionsTest extends DiffEngineTest {
         return Stream.of(Arguments.of(
                 """
                         <section>
-                            <section>2</section>
-                            <div>3</div>
+                            <section></section>
+                            <div></div>
                         </section>
                         """,
                         """
                         <section>
-                            <p>1</p>
-                            <section>2</section>
-                            <div>3</div>
+                            <p></p>
+                            <section></section>
+                            <div></div>
                         </section>
                         """
                 ),
                 Arguments.of(
                 """
                         <section>
-                            <p>1</p>
-                            <div>3</div>
+                            <p></p>
+                            <div></div>
                         </section>
                         """,
                         """
                         <section>
-                            <p>1</p>
-                            <section>2</section>
-                            <div>3</div>
+                            <p></p>
+                            <section></section>
+                            <div></div>
                         </section>
                         """
                 ),
                 Arguments.of(
                 """
                         <section>
-                            <p>1</p>
-                            <section>2</section>
+                            <p></p>
+                            <section></section>
                         </section>
                         """,
                         """
                         <section>
-                            <p>1</p>
-                            <section>2</section>
-                            <div>3</div>
+                            <p></p>
+                            <section></section>
+                            <div></div>
                         </section>
                         """
                 ),
                 Arguments.of(
             """
                         <section>
-                            <div>3</div>
+                            <div></div>
                         </section>
                         """,
                         """
                         <section>
-                            <p>1</p>
-                            <section>2</section>
-                            <div>3</div>
+                            <p></p>
+                            <section></section>
+                            <div></div>
                         </section>
                         """
                 ),
                 Arguments.of(
             """
                         <section>
-                            <section>2</section>
+                            <section></section>
                         </section>
                         """,
                         """
                         <section>
-                            <p>1</p>
-                            <section>2</section>
-                            <div>3</div>
+                            <p></p>
+                            <section></section>
+                            <div></div>
                         </section>
                         """
                 ),
                 Arguments.of(
             """
                         <section>
-                            <p>1</p>
+                            <p></p>
                         </section>
                         """,
                         """
                         <section>
-                            <p>1</p>
-                            <section>2</section>
-                            <div>3</div>
+                            <p></p>
+                            <section></section>
+                            <div></div>
                         </section>
                         """
                 ),
@@ -106,7 +106,7 @@ class OneLayerSimpleAdditionsTest extends DiffEngineTest {
                                     """,
                         """
                         <section>
-                            <p>1</p>
+                            <p></p>
                         </section>
                         """
                 ),
@@ -117,9 +117,9 @@ class OneLayerSimpleAdditionsTest extends DiffEngineTest {
                                     """,
                         """
                         <section>
-                            <p>1</p>
-                            <section>2</section>
-                            <div>3</div>
+                            <p></p>
+                            <section></section>
+                            <div></div>
                         </section>
                         """
                 ));

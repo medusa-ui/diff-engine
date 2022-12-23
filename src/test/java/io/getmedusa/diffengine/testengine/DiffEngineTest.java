@@ -3,6 +3,7 @@ package io.getmedusa.diffengine.testengine;
 import io.getmedusa.diffengine.Engine;
 import io.getmedusa.diffengine.diff.ServerSideDiff;
 import io.getmedusa.diffengine.testengine.meta.DiffEngineTestAdditionLogic;
+import io.getmedusa.diffengine.testengine.meta.DiffEngineTestEditLogic;
 import io.getmedusa.diffengine.testengine.meta.DiffEngineTestRemovalLogic;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -38,6 +39,8 @@ public abstract class DiffEngineTest {
             return DiffEngineTestAdditionLogic.applyAddition(html, diff);
         } else if(diff.isRemoval()) {
             return DiffEngineTestRemovalLogic.applyRemoval(html, diff);
+        } else if(diff.isEdit()) {
+            return DiffEngineTestEditLogic.applyEdit(html, diff);
         }
         return html;
     }
