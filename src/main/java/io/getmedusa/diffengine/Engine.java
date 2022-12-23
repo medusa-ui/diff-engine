@@ -28,9 +28,14 @@ public class Engine {
     private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer, List<String> alreadyUsedPaths) {
         List<HTMLLayer> oldHTMLLayers = oldHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
         List<HTMLLayer> newHTMLLayers = newHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
-
-        LinkedHashSet<ServerSideDiff> diffs = findAdditions(alreadyUsedPaths, oldHTMLLayers, newHTMLLayers);
-        diffs.addAll(findRemovals(oldHTMLLayers, newHTMLLayers, alreadyUsedPaths));
+        /*
+        System.out.println(layer);
+        System.out.println(oldHTMLLayers);
+        System.out.println(newHTMLLayers);
+        System.out.println();
+        */
+        LinkedHashSet<ServerSideDiff> diffs = findAdditions(oldHTMLLayers, newHTMLLayers);
+        diffs.addAll(findRemovals(oldHTMLLayers, newHTMLLayers));
         diffs.addAll(findEdits(oldHTMLLayers, newHTMLLayers));
         return diffs;
     }
@@ -53,25 +58,23 @@ public class Engine {
         return JOOX.$(layer.getContent()).children().isEmpty();
     }
 
-    private LinkedHashSet<ServerSideDiff> findRemovals(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers, List<String> alreadyUsedPaths) {
-        List<HTMLLayer> doesntExistAnyMore = calculateWhichLayersDidNotExistBefore(newHTMLLayers, oldHTMLLayers, new ArrayList<>());
+    private LinkedHashSet<ServerSideDiff> findRemovals(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
+        List<HTMLLayer> doesntExistAnyMore = calculateWhichLayersDidNotExistBefore(newHTMLLayers, oldHTMLLayers);
 
         List<ServerSideDiff> diffsRemove = new LinkedList<>();
         for(HTMLLayer removeLayer : doesntExistAnyMore) {
-            if(!alreadyUsedPaths.contains(removeLayer.getXpath())) {
-                diffsRemove.add(ServerSideDiff.buildRemoval(removeLayer));
-            }
+            diffsRemove.add(ServerSideDiff.buildRemoval(removeLayer));
         }
 
         return new LinkedHashSet<>(diffsRemove);
     }
 
-    private LinkedHashSet<ServerSideDiff> findAdditions(List<String> alreadyUsedPaths, List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
+    private LinkedHashSet<ServerSideDiff> findAdditions(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
         List<ServerSideDiff> diffsBefore = new LinkedList<>();
         List<ServerSideDiff> diffsAfter = new LinkedList<>();
         List<ServerSideDiff> diffsIn = new LinkedList<>();
 
-        List<HTMLLayer> didntExistBefore = calculateWhichLayersDidNotExistBefore(oldHTMLLayers, newHTMLLayers, alreadyUsedPaths);
+        List<HTMLLayer> didntExistBefore = calculateWhichLayersDidNotExistBefore(oldHTMLLayers, newHTMLLayers);
 
         //find where they get added (before/after)
         for(HTMLLayer newLayer : didntExistBefore) {
@@ -115,11 +118,9 @@ public class Engine {
         return new LinkedHashSet<>(diffsIn);
     }
 
-    private static List<HTMLLayer> calculateWhichLayersDidNotExistBefore(List<HTMLLayer> oldLayers, List<HTMLLayer> newLayers, List<String> alreadyUsedPaths) {
+    private static List<HTMLLayer> calculateWhichLayersDidNotExistBefore(List<HTMLLayer> oldLayers, List<HTMLLayer> newLayers) {
         List<HTMLLayer> didntExistBefore = new LinkedList<>(newLayers);
         oldLayers.forEach(didntExistBefore::remove);
-        removeAlreadyUsedPaths(alreadyUsedPaths, didntExistBefore);
-        alreadyUsedPaths.addAll(didntExistBefore.stream().map(HTMLLayer::getXpath).toList());
         return didntExistBefore;
     }
 
@@ -182,6 +183,10 @@ public class Engine {
         return -1;
     }
 
+    public static Map<Integer, List<HTMLLayer>> interpretLayer(String html) {
+        return interpretLayer(JOOX.$(html));
+    }
+
     private static Map<Integer, List<HTMLLayer>> interpretLayer(Match match) {
         Map<Integer, List<HTMLLayer>> layerMap = new HashMap<>();
         layerMap.put(1, List.of(new HTMLLayer(match)));
@@ -190,7 +195,7 @@ public class Engine {
     }
 
     private static void recursive(Match match, Map<Integer, List<HTMLLayer>> map, int layer) {
-        List<HTMLLayer> layers = new LinkedList<>();
+        List<HTMLLayer> layers = map.getOrDefault(layer, new LinkedList<>());
         for (var child : match.children()) {
             var $child = JOOX.$(child);
             layers.add(new HTMLLayer($child));

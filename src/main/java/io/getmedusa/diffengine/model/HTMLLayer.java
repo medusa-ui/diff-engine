@@ -18,8 +18,9 @@ public class HTMLLayer {
         Element element = $child.get(0);
 
         String[] xpathSplit = $child.xpath().split("/");
-        StringBuilder hashBuilder = new StringBuilder(xpathSplit[xpathSplit.length-1]);
-
+        StringBuilder hashBuilder = new StringBuilder(xpathSplit[xpathSplit.length-2]);
+        hashBuilder.append(">");
+        hashBuilder.append(xpathSplit[xpathSplit.length-1]);
         for (int i = 0; i < element.getAttributes().getLength(); i++) { //? do we want this?
             var attr = element.getAttributes().item(i);
             hashBuilder.append("/").append(attr.getNodeName()).append(attr.getNodeValue());
@@ -59,5 +60,14 @@ public class HTMLLayer {
 
     public String getParentXpath() {
         return parentXpath;
+    }
+
+    @Override
+    public String toString() {
+        return "HTMLLayer{" +
+                "hash='" + hash + '\'' +
+                ", xpath='" + xpath + '\'' +
+                ", parentXpath='" + parentXpath + '\'' +
+                '}';
     }
 }

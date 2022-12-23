@@ -31,7 +31,7 @@ public abstract class DiffEngineTest {
 
         Document expectedHTML = Jsoup.parse(newHTML);
 
-        Assertions.assertEquals(expectedHTML.outerHtml(), html.outerHtml(),"Rebuilt HTML and expected HTML do not match");
+        Assertions.assertEquals(expectedHTML.outerHtml().replace(" ", ""), html.outerHtml().replace(" ", ""),"Rebuilt HTML and expected HTML do not match");
     }
 
     private Document applyDiff(Document html, ServerSideDiff diff) {

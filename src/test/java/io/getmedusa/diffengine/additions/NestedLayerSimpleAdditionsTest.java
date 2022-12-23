@@ -61,7 +61,56 @@ class NestedLayerSimpleAdditionsTest extends DiffEngineTest {
                             </div>
                         </section>
                         """
-                ));
+                ),Arguments.of(
+                """
+                    <section>
+                     <div></div>
+                    </section>
+                        """,
+                """
+                    <section>
+                     <div><p></p></div>
+                     <div></div>
+                     <div><p></p></div>
+                    </section>
+                """
+        ),Arguments.of(
+                """
+                    <outer>
+                    </outer>
+                        """,
+                """
+                    <outer>
+                     <section>
+                        <p></p>
+                     </section>
+                     <div>
+                        <p></p>
+                     </div>
+                    </outer>
+                """
+        ),Arguments.of(
+                """
+                            <section>
+                             <h5></h5>
+                             <p></p>
+                             <div></div>
+                             <h5></h5>
+                             <p></p>
+                            </section>
+                        """,
+                        """
+                        <section>
+                         <h5></h5>
+                         <div><p></p></div>
+                         <p></p>
+                         <div></div>
+                         <h5></h5>
+                         <div><p></p></div>
+                         <p></p>
+                        </section>
+                """
+        ));
     }
 
     @ParameterizedTest

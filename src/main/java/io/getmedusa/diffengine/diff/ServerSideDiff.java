@@ -2,6 +2,7 @@ package io.getmedusa.diffengine.diff;
 
 import io.getmedusa.diffengine.model.HTMLLayer;
 import org.joox.JOOX;
+import org.joox.Match;
 
 public class ServerSideDiff {
 
@@ -81,14 +82,14 @@ public class ServerSideDiff {
 
     public static ServerSideDiff buildNewAfterDiff(HTMLLayer newLayer, HTMLLayer addAfterThisLayer) {
         ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
-        diff.setContent(newLayer.getContent());
+        diff.setContent(additionContentFilter(newLayer.getContent()));
         diff.setAfter(addAfterThisLayer.getXpath());
         return diff;
     }
 
     public static ServerSideDiff buildNewBeforeDiff(HTMLLayer newLayer, HTMLLayer addBeforeThisLayer) {
         ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
-        diff.setContent(newLayer.getContent());
+        diff.setContent(additionContentFilter(newLayer.getContent()));
         diff.setBefore(addBeforeThisLayer.getXpath());
         return diff;
     }
@@ -96,14 +97,23 @@ public class ServerSideDiff {
     public static ServerSideDiff buildInDiff(HTMLLayer layer) {
         ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
         if(layer.getParentXpath() != null) {
-            diff.setContent(layer.getContent());
+            diff.setContent(additionContentFilter(layer.getContent()));
             diff.setIn(layer.getParentXpath());
         } else {
-            diff.setContent(JOOX.$(layer.getContent()).content());
+            diff.setContent(additionContentFilter(layer.getContent()));
             diff.setIn(layer.getXpath());
         }
 
         return diff;
+    }
+
+    private static String additionContentFilter(String content) {
+        //I do not want additions to add deeper child nodes
+        final Match match = JOOX.$(content);
+        if(match.children().isNotEmpty()) {
+            match.children().remove();
+        }
+        return match.toString();
     }
 
     public static ServerSideDiff buildRemoval(HTMLLayer layer) {
@@ -130,7 +140,7 @@ public class ServerSideDiff {
         return "ServerSideDiff{" +
                 "type=" + type +
                 ((xpath != null) ? (", xpath='" + xpath + '\'') : "") +
-                ((content != null) ? (", content='" + content.trim() + '\'') : "") +
+                ((content != null) ? (", content='" + content.replace("\r\n", "").replace(" ", "").trim() + '\'') : "") +
                 ((before != null) ? (", before='" + before + '\'') : "") +
                 ((after != null) ? (", after='" + after + '\'') : "") +
                 ((in != null) ? (", in='" + in + '\'') : "") +
