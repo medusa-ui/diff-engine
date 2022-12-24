@@ -45,6 +45,15 @@ public class Engine {
             }
         }
 
+        for(var potentialEditLayer : newHTMLLayers) {
+            if(potentialEditLayer.hasTextNode()) {
+                var match = buildup.get(findMatch(potentialEditLayer, buildup));
+                if(match.hasTextNode() && !match.getContent().equals(potentialEditLayer.getContent())) {
+                    diffs.add(ServerSideDiff.buildEdit(potentialEditLayer));
+                }
+            }
+        }
+
         return diffs;
     }
 

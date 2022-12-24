@@ -1,53 +1,38 @@
 package io.getmedusa.diffengine.model;
 
 import org.joox.Match;
-import org.w3c.dom.Element;
 
 import java.util.Objects;
 
 public class HTMLLayer {
 
-    private final String hash;
-
     private final String content;
     private final String xpath;
+    private final boolean hasTextNode;
 
     private final String parentXpath;
 
     public HTMLLayer(Match $child) {
-        Element element = $child.get(0);
-
-        String[] xpathSplit = $child.xpath().split("/");
-        StringBuilder hashBuilder = new StringBuilder(xpathSplit[xpathSplit.length-2]);
-        hashBuilder.append(">");
-        hashBuilder.append(xpathSplit[xpathSplit.length-1]);
-        for (int i = 0; i < element.getAttributes().getLength(); i++) { //? do we want this?
-            var attr = element.getAttributes().item(i);
-            hashBuilder.append("/").append(attr.getNodeName()).append(attr.getNodeValue());
-        }
-        this.hash = hashBuilder.toString();
-        //TODO ensure this is unique, but consistent; xpath is not a good choice because that doesn't describe it as the same node
-
         this.content = $child.toString();
         this.xpath = $child.xpath();
         this.parentXpath = $child.parent().xpath();
+        this.hasTextNode = $child.children().isEmpty();
     }
 
-    public String getHash() {
-        return hash;
+    public boolean hasTextNode() {
+        return hasTextNode;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HTMLLayer htmlLayer = (HTMLLayer) o;
-        return hash.equals(htmlLayer.hash);
+        if (!(o instanceof HTMLLayer layer)) return false;
+        return getXpath().equals(layer.getXpath());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(hash);
+        return Objects.hash(getXpath());
     }
 
     public String getContent() {
@@ -65,8 +50,8 @@ public class HTMLLayer {
     @Override
     public String toString() {
         return "HTMLLayer{" +
-                "hash='" + hash + '\'' +
-                ", xpath='" + xpath + '\'' +
+                "xpath='" + xpath + '\'' +
+                "content='" + content + '\'' +
                 ", parentXpath='" + parentXpath + '\'' +
                 '}';
     }
