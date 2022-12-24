@@ -20,15 +20,14 @@ public class Engine {
         layers.addAll(newHTMLLayersMap.keySet());
 
         Set<ServerSideDiff> diffs = new LinkedHashSet<>();
-        List<String> alreadyUsedPaths = new ArrayList<>();
         for(int layer : layers) {
-            var diffsForOneLayer = calculateForLayer(oldHTMLLayersMap, newHTMLLayersMap, layer, alreadyUsedPaths);
+            var diffsForOneLayer = calculateForLayer(oldHTMLLayersMap, newHTMLLayersMap, layer);
             diffs.addAll(diffsForOneLayer);
         }
         return diffs;
     }
 
-    private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer, List<String> alreadyUsedPaths) {
+    private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer) {
         List<HTMLLayer> oldHTMLLayers = oldHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
         List<HTMLLayer> newHTMLLayers = newHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
 
@@ -38,7 +37,7 @@ public class Engine {
 
         boolean moreDiffsAvailable = true;
         while (moreDiffsAvailable) {
-            ServerSideDiff diff = recurringPatch(buildup,newHTMLLayers);
+            ServerSideDiff diff = recurringPatch(buildup, newHTMLLayers);
             if(diff == null) {
                 moreDiffsAvailable = false;
             } else {
@@ -69,7 +68,7 @@ public class Engine {
 
                 if (indexPosition == buildup.size()) {
                     //linkLast(layerToAdd);
-                    if(!buildup.isEmpty()) {
+                    if(containsXPath(buildup, layerToAdd.getParentXpath())) { //TODO this is the wrong buildup; should depend on the xpath?
                         diff = ServerSideDiff.buildNewAfterDiff(layerToAdd, buildup.getLast());
                     } else {
                         diff = ServerSideDiff.buildInDiff(layerToAdd);
@@ -84,6 +83,11 @@ public class Engine {
             }
         }
         return null;
+    }
+
+    private boolean containsXPath(LinkedList<HTMLLayer> buildup, String xpath) {
+        var found = buildup.stream().filter(l -> l.getXpath().equals(xpath)).findAny().orElse(null);
+        return found != null;
     }
 
     private Set<ServerSideDiff> findEdits(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
