@@ -68,5 +68,16 @@ class RecursiveLayerInterpretationTest {
         System.out.println(layers.get(4));
     }
 
-
+    @Test
+    void testSimpleLayerWithTextNodes() {
+        var layers = Engine.interpretLayer("<section>ABC<p>DEF</p>GHI</section>");
+        Assertions.assertEquals(4, layers.keySet().size());
+        Assertions.assertEquals(1, layers.get(1).size()); //body
+        Assertions.assertEquals(1, layers.get(2).size()); //section
+        Assertions.assertEquals(3, layers.get(3).size()); //'ABC', p, 'GHI'
+        Assertions.assertEquals(1, layers.get(4).size()); //'DEF'
+        System.out.println(layers.get(2));
+        System.out.println(layers.get(3));
+        System.out.println(layers.get(4));
+    }
 }

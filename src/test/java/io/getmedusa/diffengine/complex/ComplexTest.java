@@ -148,4 +148,40 @@ class ComplexTest extends DiffEngineTest {
         Set<ServerSideDiff> diffs = engine.calculate(oldHTML, newHTML);
         applyAndTest(oldHTML, newHTML, diffs);
     }
+
+    @Test
+    void testComplex5() {
+        String oldHTML = """
+                <section>
+                    <div>X <code>Y</code> Z</div>
+                </section>
+                """;
+
+        final String newHTML = """
+                <section>
+                    <p>1 <code>2</code> 3</p>
+                </section>
+                """;
+
+        Set<ServerSideDiff> diffs = engine.calculate(oldHTML, newHTML);
+        applyAndTest(oldHTML, newHTML, diffs);
+    }
+
+    @Test
+    void testComplex6() {
+        String oldHTML = """
+                <section>
+                    <div>X Z</div>
+                </section>
+                """;
+
+        final String newHTML = """
+                <section>
+                    <div>X <code>Y</code> Z</div>
+                </section>
+                """;
+
+        Set<ServerSideDiff> diffs = engine.calculate(oldHTML, newHTML);
+        applyAndTest(oldHTML, newHTML, diffs);
+    }
 }
