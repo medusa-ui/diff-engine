@@ -7,14 +7,17 @@ import io.getmedusa.diffengine.diff.ServerSideDiff;
 import io.getmedusa.diffengine.model.HTMLLayer;
 import org.joox.JOOX;
 import org.joox.Match;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
 
 import java.util.*;
 
 public class Engine {
 
     public Set<ServerSideDiff> calculate(String oldHTML, String newHTML) {
-        Map<Integer, List<HTMLLayer>> oldHTMLLayersMap = interpretLayer(JOOX.$(oldHTML));
-        Map<Integer, List<HTMLLayer>> newHTMLLayersMap = interpretLayer(JOOX.$(newHTML));
+        Map<Integer, List<HTMLLayer>> oldHTMLLayersMap = interpretLayer(initialParse(oldHTML));
+        Map<Integer, List<HTMLLayer>> newHTMLLayersMap = interpretLayer(initialParse(newHTML));
 
         Set<Integer> layers = new TreeSet<>(oldHTMLLayersMap.keySet());
         layers.addAll(newHTMLLayersMap.keySet());
@@ -25,6 +28,26 @@ public class Engine {
             diffs.addAll(diffsForOneLayer);
         }
         return diffs;
+    }
+
+    private static Match initialParse(String html) {
+        //clear scripts, clear comments, etc
+        final Document document = Jsoup.parse(html);
+        removeComments(document);
+        document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+        return JOOX.$(document.body().outerHtml());
+    }
+
+    private static void removeComments(Node node) {
+        for (int i = 0; i < node.childNodeSize();) {
+            Node child = node.childNode(i);
+            if (child.nodeName().equals("#comment"))
+                child.remove();
+            else {
+                removeComments(child);
+                i++;
+            }
+        }
     }
 
     private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer) {
@@ -45,9 +68,15 @@ public class Engine {
             }
         }
 
+        //TODO so comparing text nodes works, but its possible you have text nodes mixed with actual nodes
+        //not sure how to do this ... keep in mind we are handling it one layer at a time
         for(var potentialEditLayer : newHTMLLayers) {
             if(potentialEditLayer.hasTextNode()) {
-                var match = buildup.get(findMatch(potentialEditLayer, buildup));
+                final int index = findMatch(potentialEditLayer, buildup);
+                if(-1 == index) {
+                    continue;
+                }
+                var match = buildup.get(index);
                 if(match.hasTextNode() && !match.getContent().equals(potentialEditLayer.getContent())) {
                     diffs.add(ServerSideDiff.buildEdit(potentialEditLayer));
                 }
@@ -127,7 +156,7 @@ public class Engine {
     }
 
     public static Map<Integer, List<HTMLLayer>> interpretLayer(String html) {
-        return interpretLayer(JOOX.$(html));
+        return interpretLayer(initialParse(html));
     }
 
     private static Map<Integer, List<HTMLLayer>> interpretLayer(Match match) {

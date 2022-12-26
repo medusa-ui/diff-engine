@@ -110,4 +110,42 @@ class ComplexTest extends DiffEngineTest {
         Set<ServerSideDiff> diffs = engine.calculate(oldHTML, newHTML);
         applyAndTest(oldHTML, newHTML, diffs);
     }
+
+    @Test
+    void testComplex4() {
+        String oldHTML = """
+                <section>
+                    <span>1</span>
+                    <h5>1 <code>th:if</code>Above button</h5>
+                    
+                    <p>3 BOTTOM If bottom is <code>true</code> this should be visible at the <code>bottom</code></p>
+                    <div><button>4 change</button>
+                    </div>
+                    <h5>5 <code>th:if</code>Below button</h5>
+                    
+                    <p>7 BOTTOM If bottom is <code>true</code> this should be visible at the <code>bottom</code>, but below the button</p>
+                </section>
+                """;
+
+        final String newHTML = """
+                <section>
+                    <span>2</span>
+                    <h5>1 <code>th:if</code>Above button</h5>
+                    <div>
+                    <p>2 TOP If top is <code>true</code> this should be visible on <code>top</code> of the page</p>
+                    </div>
+                    <p>3 BOTTOM If bottom is <code>true</code> this should be visible at the <code>bottom</code></p>
+                    <div><button>4 change</button>
+                    </div>
+                    <h5>5 <code>th:if</code>Below button</h5>
+                    <div>
+                    <p>6 TOP If top is <code>true</code> this should be visible on <code>top</code> of the page, but below the button</p>
+                    </div>
+                    <p>7 BOTTOM If bottom is <code>true</code> this should be visible at the <code>bottom</code>, but below the button</p>
+                </section>
+                """;
+
+        Set<ServerSideDiff> diffs = engine.calculate(oldHTML, newHTML);
+        applyAndTest(oldHTML, newHTML, diffs);
+    }
 }

@@ -1,24 +1,26 @@
 package io.getmedusa.diffengine.diff;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.getmedusa.diffengine.model.HTMLLayer;
 import org.joox.JOOX;
 import org.joox.Match;
 
-public class ServerSideDiff {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ServerSideDiff extends AbstractDiff {
 
-    //addition
-    private String content;
     private String before;
     private String after;
     private String in;
 
-    //removal
     private String xpath;
 
-    private final DiffType type;
-
     public ServerSideDiff(DiffType type) {
-        this.type = type;
+        super(type);
+    }
+
+    public ServerSideDiff(String content, DiffType type) {
+        super(content, type);
     }
 
     public String getContent() {
@@ -61,14 +63,17 @@ public class ServerSideDiff {
         this.xpath = xpath;
     }
 
+    @JsonIgnore
     public boolean isAddition() {
         return this.type.equals(DiffType.ADDITION);
     }
 
+    @JsonIgnore
     public boolean isRemoval()  {
         return this.type.equals(DiffType.REMOVAL);
     }
 
+    @JsonIgnore
     public boolean isEdit() {
         return this.type.equals(DiffType.EDIT);
     }
@@ -108,6 +113,8 @@ public class ServerSideDiff {
     }
 
     private static String additionContentFilter(String content) {
+        if(true) return content;
+
         //I do not want additions to add deeper child nodes
         final Match match = JOOX.$(content);
         if(match.children().isNotEmpty()) {
@@ -122,19 +129,6 @@ public class ServerSideDiff {
         return diff;
     }
 
-    public enum DiffType {
-        ADDITION,
-        REMOVAL,
-        EDIT
-        /*,
-        ATTR_CHANGE,
-        TAG_CHANGE,
-        REDIRECT,
-        JS_FUNCTION,
-        LOADING,
-        SEQUENCE_CHANGE*/
-    }
-
     @Override
     public String toString() {
         return "ServerSideDiff{" +
@@ -146,4 +140,6 @@ public class ServerSideDiff {
                 ((in != null) ? (", in='" + in + '\'') : "") +
                 '}';
     }
+
+
 }
