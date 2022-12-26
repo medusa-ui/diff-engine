@@ -11,6 +11,7 @@ public abstract class DiffEngineTestLogic {
         if(!xpath.startsWith("/html[1]/body[1]")) {
             xpath = "/html[1]/body[1]" + xpath;
         }
+        xpath = xpath.replace("/body[1]/body[1]", "/body[1]");
         Elements elements = html.selectXpath(xpath);
         Assertions.assertEquals(1, elements.size(), "Expected to match a single element for '" + xpath + "'");
         return elements.get(0);

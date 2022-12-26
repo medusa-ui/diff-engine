@@ -113,8 +113,6 @@ public class ServerSideDiff extends AbstractDiff {
     }
 
     private static String additionContentFilter(String content) {
-        if(true) return content;
-
         //I do not want additions to add deeper child nodes
         final Match match = JOOX.$(content);
         if(match.children().isNotEmpty()) {
