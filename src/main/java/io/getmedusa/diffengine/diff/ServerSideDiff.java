@@ -6,6 +6,8 @@ import io.getmedusa.diffengine.model.HTMLLayer;
 import org.joox.JOOX;
 import org.joox.Match;
 
+import static io.getmedusa.diffengine.diff.AbstractDiff.DiffType.*;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ServerSideDiff extends AbstractDiff {
 
@@ -65,42 +67,42 @@ public class ServerSideDiff extends AbstractDiff {
 
     @JsonIgnore
     public boolean isAddition() {
-        return this.type.equals(DiffType.ADDITION);
+        return this.type.equals(ADDITION);
     }
 
     @JsonIgnore
     public boolean isRemoval()  {
-        return this.type.equals(DiffType.REMOVAL);
+        return this.type.equals(REMOVAL);
     }
 
     @JsonIgnore
     public boolean isEdit() {
-        return this.type.equals(DiffType.EDIT);
+        return this.type.equals(EDIT);
     }
 
     public static ServerSideDiff buildEdit(HTMLLayer newLayer) {
-        ServerSideDiff diff = new ServerSideDiff(DiffType.EDIT);
+        ServerSideDiff diff = new ServerSideDiff(EDIT);
         diff.setContent(JOOX.$(newLayer.getContent()).text());
         diff.setXpath(newLayer.getXpath());
         return diff;
     }
 
     public static ServerSideDiff buildNewAfterDiff(HTMLLayer newLayer, HTMLLayer addAfterThisLayer) {
-        ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
+        ServerSideDiff diff = new ServerSideDiff(ADDITION);
         diff.setContent(additionContentFilter(newLayer.getContent()));
         diff.setAfter(addAfterThisLayer.getXpath());
         return diff;
     }
 
     public static ServerSideDiff buildNewBeforeDiff(HTMLLayer newLayer, HTMLLayer addBeforeThisLayer) {
-        ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
+        ServerSideDiff diff = new ServerSideDiff(ADDITION);
         diff.setContent(additionContentFilter(newLayer.getContent()));
         diff.setBefore(addBeforeThisLayer.getXpath());
         return diff;
     }
 
     public static ServerSideDiff buildInDiff(HTMLLayer layer) {
-        ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.ADDITION);
+        ServerSideDiff diff = new ServerSideDiff(ADDITION);
         if(layer.getParentXpath() != null) {
             diff.setContent(additionContentFilter(layer.getContent()));
             diff.setIn(layer.getParentXpath());
@@ -122,7 +124,7 @@ public class ServerSideDiff extends AbstractDiff {
     }
 
     public static ServerSideDiff buildRemoval(HTMLLayer layer) {
-        ServerSideDiff diff = new ServerSideDiff(DiffType.REMOVAL);
+        ServerSideDiff diff = new ServerSideDiff(REMOVAL);
         diff.setXpath(layer.getXpath());
         return diff;
     }

@@ -34,6 +34,7 @@ public class Engine {
         //clear scripts, clear comments, etc
         final Document document = Jsoup.parse(html);
         removeComments(document);
+        document.outputSettings().prettyPrint(false);
         document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
         return JOOX.$(document.body().outerHtml());
     }
