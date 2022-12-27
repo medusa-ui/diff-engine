@@ -1,6 +1,8 @@
 package io.getmedusa.diffengine.model;
 
+import org.joox.JOOX;
 import org.joox.Match;
+import org.w3c.dom.Node;
 
 import java.util.Objects;
 
@@ -8,7 +10,6 @@ public class HTMLLayer {
 
     private final String content;
     private final String xpath;
-    private final boolean hasTextNode;
 
     private final String parentXpath;
 
@@ -16,11 +17,21 @@ public class HTMLLayer {
         this.content = $child.toString();
         this.xpath = $child.xpath();
         this.parentXpath = $child.parent().xpath();
-        this.hasTextNode = $child.children().isEmpty();
+    }
+
+    private HTMLLayer(String content, String xpath, String parentXpath) {
+        this.content = content;
+        this.xpath = xpath;
+        this.parentXpath = parentXpath;
+    }
+
+    public static HTMLLayer textNode(Node childNode, int index) {
+        var parentNode = JOOX.$(childNode.getParentNode());
+        return new HTMLLayer(childNode.getNodeValue(), parentNode.xpath() + "/~text@" + index, parentNode.xpath());
     }
 
     public boolean hasTextNode() {
-        return hasTextNode;
+        return xpath.contains("/~text@");
     }
 
     @Override
@@ -50,8 +61,8 @@ public class HTMLLayer {
     @Override
     public String toString() {
         return "HTMLLayer{" +
-                "xpath='" + xpath + '\'' +
-                "content='" + content + '\'' +
+                "xpath='" + xpath +
+                ", content='" + content + '\'' +
                 ", parentXpath='" + parentXpath + '\'' +
                 '}';
     }

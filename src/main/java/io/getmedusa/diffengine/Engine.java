@@ -10,6 +10,7 @@ import org.joox.Match;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Node;
+import org.w3c.dom.NodeList;
 
 import java.util.*;
 
@@ -69,8 +70,6 @@ public class Engine {
             }
         }
 
-        //TODO so comparing text nodes works, but its possible you have text nodes mixed with actual nodes
-        //not sure how to do this ... keep in mind we are handling it one layer at a time
         for(var potentialEditLayer : newHTMLLayers) {
             if(potentialEditLayer.hasTextNode()) {
                 final int index = findMatch(potentialEditLayer, buildup);
@@ -89,6 +88,8 @@ public class Engine {
 
     private ServerSideDiff recurringPatch(LinkedList<HTMLLayer> buildup, List<HTMLLayer> newHTMLLayers) {
         Patch<HTMLLayer> patch = DiffUtils.diff(buildup, newHTMLLayers);
+        //        debugLayers(buildup, newHTMLLayers);
+
         if(!patch.getDeltas().isEmpty()) {
             var delta = patch.getDeltas().get(0);
             System.out.println(delta);
@@ -99,7 +100,7 @@ public class Engine {
 
                 buildup.remove(layerToRemove);
                 return ServerSideDiff.buildRemoval(layerToRemove);
-            } else if(DeltaType.INSERT.equals(delta.getType())) {
+            } else if(DeltaType.INSERT.equals(delta.getType()) || DeltaType.CHANGE.equals(delta.getType())) {
                 HTMLLayer layerToAdd = delta.getTarget().getLines().get(0);
                 int indexPosition = delta.getSource().getPosition();
 
@@ -108,43 +109,35 @@ public class Engine {
                 if (indexPosition == buildup.size()) {
                     //linkLast(layerToAdd);
                     if(containsXPath(buildup, layerToAdd.getParentXpath())) { //TODO this is the wrong buildup; should depend on the xpath?
-                        diff = ServerSideDiff.buildNewAfterDiff(layerToAdd, buildup.getLast());
+                        diff = ServerSideDiff.buildNewAfterDiff(layerToAdd, buildup.getLast()); //this can also be the text nodes, is that ok?
                     } else {
                         diff = ServerSideDiff.buildInDiff(layerToAdd);
                     }
                 } else {
                     //linkBefore(layerToAdd, node(indexPosition));
-                    diff = ServerSideDiff.buildNewBeforeDiff(layerToAdd, buildup.get(indexPosition));
+                    diff = ServerSideDiff.buildNewBeforeDiff(layerToAdd, buildup.get(indexPosition)); //same
                 }
 
                 buildup.add(indexPosition, layerToAdd);
                 return diff;
+            } else {
+                throw new IllegalStateException("Not expected to return diffs of type: " + delta.getType());
             }
         }
         return null;
     }
 
+    private static void debugLayers(LinkedList<HTMLLayer> buildup, List<HTMLLayer> newHTMLLayers) {
+        System.out.println("/********");
+        buildup.forEach(b -> System.out.println(b.getXpath()));
+        System.out.println("---");
+        newHTMLLayers.forEach(b -> System.out.println(b.getXpath()));
+        System.out.println("********/");
+    }
+
     private boolean containsXPath(LinkedList<HTMLLayer> buildup, String xpath) {
         var found = buildup.stream().filter(l -> l.getXpath().equals(xpath)).findAny().orElse(null);
         return found != null;
-    }
-
-    private Set<ServerSideDiff> findEdits(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
-        Set<ServerSideDiff> diffs = new LinkedHashSet<>();
-        for(HTMLLayer newLayer : newHTMLLayers) {
-            int index = findMatch(newLayer, oldHTMLLayers);
-            if(-1 != index && layerContentIsLimitedToLayer(newLayer)) {
-                HTMLLayer layer = oldHTMLLayers.get(index);
-                if (layerContentIsLimitedToLayer(layer) && !newLayer.getContent().equals(layer.getContent())) {
-                    diffs.add(ServerSideDiff.buildEdit(newLayer));
-                }
-            }
-        }
-        return diffs;
-    }
-
-    private boolean layerContentIsLimitedToLayer(HTMLLayer layer) {
-        return JOOX.$(layer.getContent()).children().isEmpty();
     }
 
     private static int findMatch(HTMLLayer layerToMatch, List<HTMLLayer> listToMatchIn) {
@@ -169,14 +162,32 @@ public class Engine {
 
     private static void recursive(Match match, Map<Integer, List<HTMLLayer>> map, int layer) {
         List<HTMLLayer> layers = map.getOrDefault(layer, new LinkedList<>());
-        for (var child : match.children()) {
-            var $child = JOOX.$(child);
-            layers.add(new HTMLLayer($child));
-            if($child.children().isNotEmpty()) {
-                recursive($child, map, layer + 1);
+        for (var element : match) {
+            final NodeList childNodes = element.getChildNodes();
+            int indexTextNodes = 0;
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                var childNode = childNodes.item(i);
+                var $child = JOOX.$(childNode);
+                if("#text".equals(childNode.getNodeName())) {
+                    layers.add(HTMLLayer.textNode(childNode, indexTextNodes++));
+                } else {
+                    layers.add(new HTMLLayer($child));
+                }
+                if(hasChildNodes($child)) {
+                    recursive($child, map, layer + 1);
+                }
             }
         }
         map.put(layer, layers);
+    }
+
+    protected static boolean hasChildNodes(Match child) {
+        for(var elem : child) {
+            if(elem.getChildNodes().getLength() > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

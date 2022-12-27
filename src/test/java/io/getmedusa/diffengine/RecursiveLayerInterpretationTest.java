@@ -19,14 +19,16 @@ class RecursiveLayerInterpretationTest {
     @Test
     void testSimpleLayer2() {
         var layers = Engine.interpretLayer("<section><p>A</p><div><p>2</p></div><p>B</p></section>");
-        Assertions.assertEquals(4, layers.keySet().size());
+        Assertions.assertEquals(5, layers.keySet().size());
         Assertions.assertEquals(1, layers.get(1).size()); //body
         Assertions.assertEquals(1, layers.get(2).size()); //section
         Assertions.assertEquals(3, layers.get(3).size()); //(section>)p, (section>)div, (section>)p
-        Assertions.assertEquals(1, layers.get(4).size()); //(div>)p
+        Assertions.assertEquals(3, layers.get(4).size()); //p>A, (div>)p, p>B
+        Assertions.assertEquals(1, layers.get(5).size()); //2
         System.out.println(layers.get(2));
         System.out.println(layers.get(3));
         System.out.println(layers.get(4));
+        System.out.println(layers.get(5));
     }
 
     @Test
