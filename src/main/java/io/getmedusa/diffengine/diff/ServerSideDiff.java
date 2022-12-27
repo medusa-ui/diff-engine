@@ -82,21 +82,21 @@ public class ServerSideDiff extends AbstractDiff {
 
     public static ServerSideDiff buildEdit(HTMLLayer newLayer) {
         ServerSideDiff diff = new ServerSideDiff(EDIT);
-        diff.setContent(newLayer.getContent());
+        diff.setContent(JOOX.$(newLayer.getContent()).text());
         diff.setXpath(newLayer.getXpath());
         return diff;
     }
 
     public static ServerSideDiff buildNewAfterDiff(HTMLLayer newLayer, HTMLLayer addAfterThisLayer) {
         ServerSideDiff diff = new ServerSideDiff(ADDITION);
-        diff.setContent(additionContentFilter(newLayer));
+        diff.setContent(additionContentFilter(newLayer.getContent()));
         diff.setAfter(addAfterThisLayer.getXpath());
         return diff;
     }
 
     public static ServerSideDiff buildNewBeforeDiff(HTMLLayer newLayer, HTMLLayer addBeforeThisLayer) {
         ServerSideDiff diff = new ServerSideDiff(ADDITION);
-        diff.setContent(additionContentFilter(newLayer));
+        diff.setContent(additionContentFilter(newLayer.getContent()));
         diff.setBefore(addBeforeThisLayer.getXpath());
         return diff;
     }
@@ -104,27 +104,23 @@ public class ServerSideDiff extends AbstractDiff {
     public static ServerSideDiff buildInDiff(HTMLLayer layer) {
         ServerSideDiff diff = new ServerSideDiff(ADDITION);
         if(layer.getParentXpath() != null) {
-            diff.setContent(additionContentFilter(layer));
+            diff.setContent(additionContentFilter(layer.getContent()));
             diff.setIn(layer.getParentXpath());
         } else {
-            diff.setContent(additionContentFilter(layer));
+            diff.setContent(additionContentFilter(layer.getContent()));
             diff.setIn(layer.getXpath());
         }
 
         return diff;
     }
 
-    private static String additionContentFilter(HTMLLayer content) {
-        if(content.getXpath().contains("~text@")) {
-            return content.getContent();
-        } else {
-            //I do not want additions to add deeper child nodes
-            final Match match = JOOX.$(content.getContent());
-            if (match.children().isNotEmpty()) {
-                match.children().remove();
-            }
-            return match.toString();
+    private static String additionContentFilter(String content) {
+        //I do not want additions to add deeper child nodes
+        final Match match = JOOX.$(content);
+        if(match.children().isNotEmpty()) {
+            match.children().remove();
         }
+        return match.toString();
     }
 
     public static ServerSideDiff buildRemoval(HTMLLayer layer) {
@@ -137,7 +133,7 @@ public class ServerSideDiff extends AbstractDiff {
     public String toString() {
         return "ServerSideDiff{" +
                 "type=" + type +
-                ((xpath != null) ? (", xpath='" + xpath + "'") : "") +
+                ((xpath != null) ? (", xpath='" + xpath + '\'') : "") +
                 ((content != null) ? (", content='" + content.replace("\r\n", "").replace(" ", "").trim() + '\'') : "") +
                 ((before != null) ? (", before='" + before + '\'') : "") +
                 ((after != null) ? (", after='" + after + '\'') : "") +

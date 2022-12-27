@@ -2,7 +2,6 @@ package io.getmedusa.diffengine.testengine.edits;
 
 import io.getmedusa.diffengine.diff.ServerSideDiff;
 import io.getmedusa.diffengine.testengine.DiffEngineTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,27 +36,9 @@ class TestEngineEditsTest extends DiffEngineTest {
     void testEditParameters(String oldHTML, String newHTML) {
         Set<ServerSideDiff> diffs = new LinkedHashSet<>();
         ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.EDIT);
-        diff.setXpath("/html[1]/body[1]/section[1]/p[1]/~text@0");
+        diff.setXpath("/html[1]/body[1]/section[1]/p[1]");
         diff.setContent("B");
         diffs.add(diff);
         applyAndTest(oldHTML, newHTML, diffs);
-    }
-
-    @Test
-    void testTextNodeChange() {
-        Set<ServerSideDiff> diffs = new LinkedHashSet<>();
-        ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.EDIT);
-        diff.setXpath("/html[1]/body[1]/section[1]/p[1]/~text@0");
-        diff.setContent("C");
-        diffs.add(diff);
-        applyAndTest("""
-                        <section>
-                            <p>B</p>
-                        </section>
-                        """, """
-                        <section>
-                            <p>C</p>
-                        </section>
-                        """, diffs);
     }
 }
