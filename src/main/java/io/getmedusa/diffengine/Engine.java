@@ -4,6 +4,7 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.DeltaType;
 import com.github.difflib.patch.Patch;
 import io.getmedusa.diffengine.diff.ServerSideDiff;
+import io.getmedusa.diffengine.diff.TextNode;
 import io.getmedusa.diffengine.model.HTMLLayer;
 import org.joox.JOOX;
 import org.joox.Match;
@@ -69,8 +70,12 @@ public class Engine {
             }
         }
 
-        //TODO so comparing text nodes works, but its possible you have text nodes mixed with actual nodes
-        //not sure how to do this ... keep in mind we are handling it one layer at a time
+        handleTextEdits(newHTMLLayers, diffs, buildup);
+
+        return diffs;
+    }
+
+    private void handleTextEdits(List<HTMLLayer> newHTMLLayers, LinkedHashSet<ServerSideDiff> diffs, LinkedList<HTMLLayer> buildup) {
         for(var potentialEditLayer : newHTMLLayers) {
             if(potentialEditLayer.hasTextNode()) {
                 final int index = findMatch(potentialEditLayer, buildup);
@@ -78,13 +83,77 @@ public class Engine {
                     continue;
                 }
                 var match = buildup.get(index);
-                if(match.hasTextNode() && !match.getContent().equals(potentialEditLayer.getContent())) {
-                    diffs.add(ServerSideDiff.buildEdit(potentialEditLayer));
-                }
+
+                //if potentialEditLayer has one that match does not have = addition
+                LinkedList<ServerSideDiff> determinedAdditions = determineTextNodeAdditions(potentialEditLayer, potentialEditLayer.getTextNodes(), match.getTextNodes());
+                diffs.addAll(determinedAdditions);
+
+                //if potentialEditLayer does not have one that matches match = removal
+                LinkedList<ServerSideDiff> determinedRemovals = determineTextNodeRemovals(potentialEditLayer.getTextNodes(), match.getTextNodes());
+                diffs.addAll(determinedRemovals);
+
+                //if there's a different value = text edit
+                LinkedList<ServerSideDiff> determinedEdits = determineTextNodeEdits(potentialEditLayer.getTextNodes(), match.getTextNodes());
+                determinedAdditions.forEach(a -> determinedEdits.removeAll(determinedEdits.stream().filter(e -> e.getXpath().equals(a.getXpath())).toList()));
+                determinedRemovals.forEach(a -> determinedEdits.removeAll(determinedEdits.stream().filter(e -> e.getXpath().equals(a.getXpath())).toList()));
+                diffs.addAll(determinedEdits);
             }
         }
+    }
 
-        return diffs;
+    private LinkedList<ServerSideDiff> determineTextNodeEdits(LinkedList<TextNode> newTextNodes, LinkedList<TextNode> oldTextNodes) {
+        LinkedList<TextNode> edits = new LinkedList<>();
+        if(oldTextNodes == null) {
+            oldTextNodes = new LinkedList<>();
+        }
+        for (int i = 0; i < newTextNodes.size(); i++) {
+            String oldTextNode = "";
+            if(oldTextNodes.size() > i) {
+                oldTextNode = oldTextNodes.get(i).getContent();
+            }
+            if(!newTextNodes.get(i).getContent().equals(oldTextNode)) {
+                edits.add(newTextNodes.get(i));
+            }
+        }
+        return new LinkedList<>(edits.stream().filter(r -> !r.getContent().trim().isBlank()).map(ServerSideDiff::buildEdit).toList());
+    }
+
+    private LinkedList<ServerSideDiff> determineTextNodeRemovals(LinkedList<TextNode> newTextNodes, LinkedList<TextNode> oldTextNodes) {
+        if(newTextNodes == null) {
+            newTextNodes = new LinkedList<>();
+        }
+        var removals = new LinkedList<>(oldTextNodes);
+        newTextNodes.forEach(removals::remove);
+        return new LinkedList<>(removals.stream().filter(r -> !r.getContent().trim().isBlank()).map(ServerSideDiff::buildRemoval).toList());
+    }
+
+    private LinkedList<ServerSideDiff> determineTextNodeAdditions(HTMLLayer layer, LinkedList<TextNode> newTextNodes, LinkedList<TextNode> oldTextNodes) {
+        var additions = new LinkedList<>(newTextNodes);
+        oldTextNodes.forEach(additions::remove);
+
+        LinkedList<ServerSideDiff> result = new LinkedList<>();
+        for(TextNode text : additions) {
+            if(text.getContent().trim().isBlank()) {
+                continue;
+            }
+
+            //
+            final ServerSideDiff diff;
+            if(text.getPrevious() != null) {
+                //after
+                String afterXPATH = JOOX.$(text.getPrevious()).xpath();
+                diff = ServerSideDiff.buildNewAfterDiff(text, afterXPATH);
+            } else if(text.getNext() != null) {
+                //before
+                String beforeXPATH = JOOX.$(text.getNext()).xpath();
+                diff = ServerSideDiff.buildNewBeforeDiff(text, beforeXPATH);
+            } else {
+                //in
+                diff = ServerSideDiff.buildInDiff(text, layer.getXpath());
+            }
+            result.add(diff);
+        }
+        return result;
     }
 
     private ServerSideDiff recurringPatch(LinkedList<HTMLLayer> buildup, List<HTMLLayer> newHTMLLayers) {

@@ -25,6 +25,7 @@ public class ServerSideDiff extends AbstractDiff {
         super(content, type);
     }
 
+
     public String getContent() {
         return content;
     }
@@ -87,6 +88,14 @@ public class ServerSideDiff extends AbstractDiff {
         return diff;
     }
 
+    public static ServerSideDiff buildEdit(TextNode e) {
+        ServerSideDiff diff = new ServerSideDiff(EDIT);
+        diff.setContent(e.getContent());
+        diff.setXpath(e.getXpath());
+        return diff;
+    }
+
+
     public static ServerSideDiff buildNewAfterDiff(HTMLLayer newLayer, HTMLLayer addAfterThisLayer) {
         ServerSideDiff diff = new ServerSideDiff(ADDITION);
         diff.setContent(additionContentFilter(newLayer.getContent()));
@@ -94,10 +103,26 @@ public class ServerSideDiff extends AbstractDiff {
         return diff;
     }
 
+    public static ServerSideDiff buildNewAfterDiff(TextNode text, String afterXPATH) {
+        ServerSideDiff diff = new ServerSideDiff(ADDITION);
+        diff.setContent(text.getContent());
+        diff.setAfter(afterXPATH);
+        diff.setXpath(text.getXpath());
+        return diff;
+    }
+
     public static ServerSideDiff buildNewBeforeDiff(HTMLLayer newLayer, HTMLLayer addBeforeThisLayer) {
         ServerSideDiff diff = new ServerSideDiff(ADDITION);
         diff.setContent(additionContentFilter(newLayer.getContent()));
         diff.setBefore(addBeforeThisLayer.getXpath());
+        return diff;
+    }
+
+    public static ServerSideDiff buildNewBeforeDiff(TextNode text, String afterXPATH) {
+        ServerSideDiff diff = new ServerSideDiff(ADDITION);
+        diff.setContent(text.getContent());
+        diff.setBefore(afterXPATH);
+        diff.setXpath(text.getXpath());
         return diff;
     }
 
@@ -114,6 +139,14 @@ public class ServerSideDiff extends AbstractDiff {
         return diff;
     }
 
+    public static ServerSideDiff buildInDiff(TextNode text, String inXPath) {
+        ServerSideDiff diff = new ServerSideDiff(ADDITION);
+        diff.setContent(text.getContent());
+        diff.setIn(inXPath);
+        diff.setXpath(text.getXpath());
+        return diff;
+    }
+
     private static String additionContentFilter(String content) {
         //I do not want additions to add deeper child nodes
         final Match match = JOOX.$(content);
@@ -126,6 +159,12 @@ public class ServerSideDiff extends AbstractDiff {
     public static ServerSideDiff buildRemoval(HTMLLayer layer) {
         ServerSideDiff diff = new ServerSideDiff(REMOVAL);
         diff.setXpath(layer.getXpath());
+        return diff;
+    }
+
+    public static ServerSideDiff buildRemoval(TextNode r) {
+        ServerSideDiff diff = new ServerSideDiff(REMOVAL);
+        diff.setXpath(r.getXpath());
         return diff;
     }
 
