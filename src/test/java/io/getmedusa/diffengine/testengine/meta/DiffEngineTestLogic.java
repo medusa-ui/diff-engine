@@ -8,6 +8,14 @@ import org.junit.jupiter.api.Assertions;
 public abstract class DiffEngineTestLogic {
 
     protected static Node xpath(Document html, String xpath) {
+        return xpath(html, xpath, true);
+    }
+
+    protected static Node xpathWithoutVerify(Document html, String xpath) {
+        return xpath(html, xpath, false);
+    }
+
+    private static Node xpath(Document html, String xpath, boolean verify) {
         if(!xpath.startsWith("/html[1]/body[1]")) {
             xpath = "/html[1]/body[1]" + xpath;
         }
@@ -26,7 +34,8 @@ public abstract class DiffEngineTestLogic {
             }
         }
 
-        Assertions.assertEquals(1, elements.size(), "Expected to match a single element for '" + xpath + "'");
+        if(verify) Assertions.assertEquals(1, elements.size(), "Expected to match a single element for '" + xpath + "'");
+        if(elements.isEmpty()) return null;
         return elements.get(0);
     }
 

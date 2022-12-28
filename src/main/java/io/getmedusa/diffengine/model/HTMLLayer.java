@@ -1,6 +1,7 @@
 package io.getmedusa.diffengine.model;
 
 import io.getmedusa.diffengine.diff.TextNode;
+import org.joox.JOOX;
 import org.joox.Match;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
@@ -21,6 +22,12 @@ public class HTMLLayer {
         this.xpath = $child.xpath();
         this.parentXpath = $child.parent().xpath();
         determineIfHasTextNodes($child);
+    }
+
+    private HTMLLayer(String content, String xpath, String parentXpath) {
+        this.content = content;
+        this.xpath = xpath;
+        this.parentXpath = parentXpath;
     }
 
     private boolean determineIfHasTextNodes(Match match) {
@@ -76,5 +83,12 @@ public class HTMLLayer {
                 "content='" + content + '\'' +
                 ", parentXpath='" + parentXpath + '\'' +
                 '}';
+    }
+
+    public HTMLLayer cloneAndPruneContentIntoTagOnly() {
+        //I do not want additions to add deeper child nodes
+        final Match match = JOOX.$(content);
+        String newContent = "<" + match.tag() + "></" + match.tag() + ">";
+        return new HTMLLayer(newContent, xpath, parentXpath);
     }
 }

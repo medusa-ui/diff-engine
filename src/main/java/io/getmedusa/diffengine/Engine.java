@@ -24,10 +24,13 @@ public class Engine {
         layers.addAll(newHTMLLayersMap.keySet());
 
         Set<ServerSideDiff> diffs = new LinkedHashSet<>();
+        Set<ServerSideDiff> diffsText = new LinkedHashSet<>();
         for(int layer : layers) {
-            var diffsForOneLayer = calculateForLayer(oldHTMLLayersMap, newHTMLLayersMap, layer);
-            diffs.addAll(diffsForOneLayer);
+            var diffsForOneLayerArray = calculateForLayer(oldHTMLLayersMap, newHTMLLayersMap, layer);
+            diffs.addAll(diffsForOneLayerArray[0]);
+            diffsText.addAll(diffsForOneLayerArray[1]);
         }
+        diffs.addAll(diffsText);
         return diffs;
     }
 
@@ -52,7 +55,7 @@ public class Engine {
         }
     }
 
-    private LinkedHashSet<ServerSideDiff> calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer) {
+    private LinkedHashSet<ServerSideDiff>[] calculateForLayer(Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, Map<Integer, List<HTMLLayer>> newHTMLLayersMap, int layer) {
         List<HTMLLayer> oldHTMLLayers = oldHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
         List<HTMLLayer> newHTMLLayers = newHTMLLayersMap.getOrDefault(layer, new LinkedList<>());
 
@@ -70,9 +73,10 @@ public class Engine {
             }
         }
 
-        handleTextEdits(newHTMLLayers, diffs, buildup);
+        LinkedHashSet<ServerSideDiff> textChangesToBeAddedLast = new LinkedHashSet<>();
+        handleTextEdits(newHTMLLayers, textChangesToBeAddedLast, buildup);
 
-        return diffs;
+        return new LinkedHashSet[]{diffs, textChangesToBeAddedLast};
     }
 
     private void handleTextEdits(List<HTMLLayer> newHTMLLayers, LinkedHashSet<ServerSideDiff> diffs, LinkedList<HTMLLayer> buildup) {
@@ -162,7 +166,7 @@ public class Engine {
             var delta = patch.getDeltas().get(0);
             System.out.println(delta);
 
-            if(DeltaType.DELETE.equals(delta.getType())) {
+            if(DeltaType.DELETE.equals(delta.getType()) || DeltaType.CHANGE.equals(delta.getType())) {
                 final int indexToRemove = delta.getSource().getPosition();
                 final HTMLLayer layerToRemove = buildup.get(indexToRemove);
 
@@ -170,13 +174,14 @@ public class Engine {
                 return ServerSideDiff.buildRemoval(layerToRemove);
             } else if(DeltaType.INSERT.equals(delta.getType())) {
                 HTMLLayer layerToAdd = delta.getTarget().getLines().get(0);
+                layerToAdd = layerToAdd.cloneAndPruneContentIntoTagOnly();
                 int indexPosition = delta.getSource().getPosition();
 
                 final ServerSideDiff diff;
 
                 if (indexPosition == buildup.size()) {
                     //linkLast(layerToAdd);
-                    if(containsXPath(buildup, layerToAdd.getParentXpath())) { //TODO this is the wrong buildup; should depend on the xpath?
+                    if(containsXPath(buildup, layerToAdd.getParentXpath())) { //? TODO this is the wrong buildup; should depend on the xpath?
                         diff = ServerSideDiff.buildNewAfterDiff(layerToAdd, buildup.getLast());
                     } else {
                         diff = ServerSideDiff.buildInDiff(layerToAdd);
@@ -196,24 +201,6 @@ public class Engine {
     private boolean containsXPath(LinkedList<HTMLLayer> buildup, String xpath) {
         var found = buildup.stream().filter(l -> l.getXpath().equals(xpath)).findAny().orElse(null);
         return found != null;
-    }
-
-    private Set<ServerSideDiff> findEdits(List<HTMLLayer> oldHTMLLayers, List<HTMLLayer> newHTMLLayers) {
-        Set<ServerSideDiff> diffs = new LinkedHashSet<>();
-        for(HTMLLayer newLayer : newHTMLLayers) {
-            int index = findMatch(newLayer, oldHTMLLayers);
-            if(-1 != index && layerContentIsLimitedToLayer(newLayer)) {
-                HTMLLayer layer = oldHTMLLayers.get(index);
-                if (layerContentIsLimitedToLayer(layer) && !newLayer.getContent().equals(layer.getContent())) {
-                    diffs.add(ServerSideDiff.buildEdit(newLayer));
-                }
-            }
-        }
-        return diffs;
-    }
-
-    private boolean layerContentIsLimitedToLayer(HTMLLayer layer) {
-        return JOOX.$(layer.getContent()).children().isEmpty();
     }
 
     private static int findMatch(HTMLLayer layerToMatch, List<HTMLLayer> listToMatchIn) {

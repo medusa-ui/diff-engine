@@ -3,8 +3,6 @@ package io.getmedusa.diffengine.diff;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.getmedusa.diffengine.model.HTMLLayer;
-import org.joox.JOOX;
-import org.joox.Match;
 
 import static io.getmedusa.diffengine.diff.AbstractDiff.DiffType.*;
 
@@ -81,13 +79,6 @@ public class ServerSideDiff extends AbstractDiff {
         return this.type.equals(EDIT);
     }
 
-    public static ServerSideDiff buildEdit(HTMLLayer newLayer) {
-        ServerSideDiff diff = new ServerSideDiff(EDIT);
-        diff.setContent(JOOX.$(newLayer.getContent()).text());
-        diff.setXpath(newLayer.getXpath());
-        return diff;
-    }
-
     public static ServerSideDiff buildEdit(TextNode e) {
         ServerSideDiff diff = new ServerSideDiff(EDIT);
         diff.setContent(e.getContent());
@@ -98,7 +89,7 @@ public class ServerSideDiff extends AbstractDiff {
 
     public static ServerSideDiff buildNewAfterDiff(HTMLLayer newLayer, HTMLLayer addAfterThisLayer) {
         ServerSideDiff diff = new ServerSideDiff(ADDITION);
-        diff.setContent(additionContentFilter(newLayer.getContent()));
+        diff.setContent(newLayer.getContent());
         diff.setAfter(addAfterThisLayer.getXpath());
         return diff;
     }
@@ -113,7 +104,7 @@ public class ServerSideDiff extends AbstractDiff {
 
     public static ServerSideDiff buildNewBeforeDiff(HTMLLayer newLayer, HTMLLayer addBeforeThisLayer) {
         ServerSideDiff diff = new ServerSideDiff(ADDITION);
-        diff.setContent(additionContentFilter(newLayer.getContent()));
+        diff.setContent(newLayer.getContent());
         diff.setBefore(addBeforeThisLayer.getXpath());
         return diff;
     }
@@ -129,10 +120,10 @@ public class ServerSideDiff extends AbstractDiff {
     public static ServerSideDiff buildInDiff(HTMLLayer layer) {
         ServerSideDiff diff = new ServerSideDiff(ADDITION);
         if(layer.getParentXpath() != null) {
-            diff.setContent(additionContentFilter(layer.getContent()));
+            diff.setContent(layer.getContent());
             diff.setIn(layer.getParentXpath());
         } else {
-            diff.setContent(additionContentFilter(layer.getContent()));
+            diff.setContent(layer.getContent());
             diff.setIn(layer.getXpath());
         }
 
@@ -145,15 +136,6 @@ public class ServerSideDiff extends AbstractDiff {
         diff.setIn(inXPath);
         diff.setXpath(text.getXpath());
         return diff;
-    }
-
-    private static String additionContentFilter(String content) {
-        //I do not want additions to add deeper child nodes
-        final Match match = JOOX.$(content);
-        if(match.children().isNotEmpty()) {
-            match.children().remove();
-        }
-        return match.toString();
     }
 
     public static ServerSideDiff buildRemoval(HTMLLayer layer) {
