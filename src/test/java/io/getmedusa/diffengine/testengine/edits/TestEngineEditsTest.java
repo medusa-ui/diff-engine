@@ -36,7 +36,7 @@ class TestEngineEditsTest extends DiffEngineTest {
     void testEditParameters(String oldHTML, String newHTML) {
         Set<ServerSideDiff> diffs = new LinkedHashSet<>();
         ServerSideDiff diff = new ServerSideDiff(ServerSideDiff.DiffType.EDIT);
-        diff.setXpath("/html[1]/body[1]/section[1]/p[1]");
+        diff.setXpath("/html[1]/body[1]/section[1]/p[1]/text()[0]");
         diff.setContent("B");
         diffs.add(diff);
         applyAndTest(oldHTML, newHTML, diffs);
