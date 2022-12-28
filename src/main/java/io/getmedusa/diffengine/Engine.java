@@ -69,6 +69,9 @@ public class Engine {
             if(diff == null) {
                 moreDiffsAvailable = false;
             } else {
+                if(diff.isRemoval()) {
+                    removeDeeperElementsFromBuildup(diff.getXpath(), oldHTMLLayersMap, layer);
+                }
                 diffs.add(diff);
             }
         }
@@ -77,6 +80,26 @@ public class Engine {
         handleTextEdits(newHTMLLayers, textChangesToBeAddedLast, buildup);
 
         return new LinkedHashSet[]{diffs, textChangesToBeAddedLast};
+    }
+
+    /**
+     * If at any point we remove a nested structure, we cannot expect to refer to deeper elements of the nested structure any more
+     * Thus upon a removal diff, check the xpath for deeper structures and get rid of them
+     * @param xpath of the parent just removed
+     * @param oldHTMLLayersMap
+     * @param layer check only deeper layers
+     */
+    private void removeDeeperElementsFromBuildup(String xpath, Map<Integer, List<HTMLLayer>> oldHTMLLayersMap, int layer) {
+        List<HTMLLayer> deeperLayers = oldHTMLLayersMap.getOrDefault(layer + 1, new LinkedList<>());
+        List<HTMLLayer> layersToRemove = new ArrayList<>();
+        for(HTMLLayer deeperLayer : deeperLayers) {
+            if(deeperLayer.getParentXpath().equals(xpath)) {
+                System.out.println("Removed deeper layer: " + deeperLayer.getXpath());
+                layersToRemove.add(deeperLayer);
+                removeDeeperElementsFromBuildup(deeperLayer.getXpath(), oldHTMLLayersMap, layer + 1);
+            }
+        }
+        deeperLayers.removeAll(layersToRemove);
     }
 
     private void handleTextEdits(List<HTMLLayer> newHTMLLayers, LinkedHashSet<ServerSideDiff> diffs, LinkedList<HTMLLayer> buildup) {
@@ -179,10 +202,18 @@ public class Engine {
 
                 final ServerSideDiff diff;
 
-                if (indexPosition == buildup.size()) {
+                if (indexPosition == buildup.size()) { //so this is saying: add all the way at the end of possible tags
                     //linkLast(layerToAdd);
-                    if(containsXPath(buildup, layerToAdd.getParentXpath())) { //? TODO this is the wrong buildup; should depend on the xpath?
-                        diff = ServerSideDiff.buildNewAfterDiff(layerToAdd, buildup.getLast());
+                    //but if you just add last, you can have different sections of layers (adding 2 p tags, 1 under /section and 1 under /div; would look the same!)
+                    //so really you need to find the last tag with xpath that matches the parent xpath of the to-add node
+                    if(!buildup.isEmpty()) {
+                        final HTMLLayer lastLayerMatchingXPathParent = getLastLayerMatchingXPathParent(buildup, layerToAdd);
+                        if(lastLayerMatchingXPathParent != null) {
+                            diff = ServerSideDiff.buildNewAfterDiff(layerToAdd, lastLayerMatchingXPathParent);
+                        } else { //and should there not be one of those, we do an in
+                            diff = ServerSideDiff.buildInDiff(layerToAdd);
+                        }
+
                     } else {
                         diff = ServerSideDiff.buildInDiff(layerToAdd);
                     }
@@ -198,9 +229,14 @@ public class Engine {
         return null;
     }
 
-    private boolean containsXPath(LinkedList<HTMLLayer> buildup, String xpath) {
-        var found = buildup.stream().filter(l -> l.getXpath().equals(xpath)).findAny().orElse(null);
-        return found != null;
+    private static HTMLLayer getLastLayerMatchingXPathParent(LinkedList<HTMLLayer> buildup, HTMLLayer layerToAdd) {
+        for (int i = buildup.size() - 1; i >= 0; i--) {
+            final HTMLLayer layer = buildup.get(i);
+            if(layer.getParentXpath().equals(layerToAdd.getParentXpath())) {
+                return layer;
+            }
+        }
+        return null;
     }
 
     private static int findMatch(HTMLLayer layerToMatch, List<HTMLLayer> listToMatchIn) {
