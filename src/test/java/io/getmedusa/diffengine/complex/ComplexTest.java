@@ -150,6 +150,35 @@ class ComplexTest extends DiffEngineTest {
     }
 
     @Test
+    void testComplex7() {
+        String oldHTML = """
+                <section>
+                    <p>3 BOTTOM If bottom is <code>true</code> this should be visible at the <code>bottom</code></p>
+                    <div>
+                        <button>4 change</button>
+                    </div>
+                    <p>7 BOTTOM If bottom is <code>true</code> this should be visible at the <code>bottom</code>, but below the button</p>
+                </section>
+                """;
+
+        final String newHTML = """
+                <section>
+                    <div>
+                        <p>2 TOP If top is <code>true</code> this should be visible on <code>top</code> of the page</p>
+                    </div>
+                    <p>3 BOTTOM If bottom is <code>true</code> this should be visible at the <code>bottom</code></p>
+                    <div>
+                        <button>4 change</button>
+                    </div>
+                    <p>7 BOTTOM If bottom is <code>true</code> this should be visible at the <code>bottom</code>, but below the button</p>
+                </section>
+                """;
+
+        Set<ServerSideDiff> diffs = engine.calculate(oldHTML, newHTML);
+        applyAndTest(oldHTML, newHTML, diffs);
+    }
+
+    @Test
     void testComplex5() {
         String oldHTML = """
                 <section>
