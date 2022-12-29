@@ -6,7 +6,7 @@
 
     <groupId>io.getmedusa</groupId>
     <artifactId>diff-engine</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
