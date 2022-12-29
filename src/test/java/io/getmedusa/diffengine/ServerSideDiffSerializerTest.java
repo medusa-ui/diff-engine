@@ -2,7 +2,7 @@ package io.getmedusa.diffengine;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.getmedusa.diffengine.diff.ServerSideDiff;
+import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.model.HTMLLayer;
 import org.joox.JOOX;
 import org.junit.jupiter.api.Test;

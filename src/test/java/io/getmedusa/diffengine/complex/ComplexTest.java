@@ -1,6 +1,6 @@
 package io.getmedusa.diffengine.complex;
 
-import io.getmedusa.diffengine.diff.ServerSideDiff;
+import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.testengine.DiffEngineTest;
 import org.junit.jupiter.api.Test;
 

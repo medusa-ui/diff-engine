@@ -1,7 +1,7 @@
 package io.getmedusa.diffengine.testengine;
 
 import io.getmedusa.diffengine.Engine;
-import io.getmedusa.diffengine.diff.ServerSideDiff;
+import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.testengine.meta.DiffEngineTestAdditionLogic;
 import io.getmedusa.diffengine.testengine.meta.DiffEngineTestEditLogic;
 import io.getmedusa.diffengine.testengine.meta.DiffEngineTestRemovalLogic;

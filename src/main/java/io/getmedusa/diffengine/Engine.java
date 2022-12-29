@@ -1,6 +1,6 @@
 package io.getmedusa.diffengine;
 
-import io.getmedusa.diffengine.diff.ServerSideDiff;
+import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.engine.HTMLLayerBuildupEngineLogic;
 import io.getmedusa.diffengine.engine.RecursiveDiffEngineLogic;
 import io.getmedusa.diffengine.engine.TextEditEngineLogic;

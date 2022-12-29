@@ -1,9 +1,7 @@
 package io.getmedusa.diffengine.engine;
 
-import com.github.difflib.DiffUtils;
-import com.github.difflib.patch.DeltaType;
-import com.github.difflib.patch.Patch;
-import io.getmedusa.diffengine.diff.ServerSideDiff;
+import io.getmedusa.diffengine.model.Delta;
+import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.model.HTMLLayer;
 
 import java.util.LinkedList;
@@ -14,21 +12,18 @@ public class RecursiveDiffEngineLogic {
     private RecursiveDiffEngineLogic() {}
 
     public static ServerSideDiff recurringPatch(LinkedList<HTMLLayer> buildup, List<HTMLLayer> newHTMLLayers) {
-        Patch<HTMLLayer> patch = DiffUtils.diff(buildup, newHTMLLayers);
-        if(!patch.getDeltas().isEmpty()) {
-            var delta = patch.getDeltas().get(0);
-            //System.out.println(delta);
-
-            if(DeltaType.DELETE.equals(delta.getType()) || DeltaType.CHANGE.equals(delta.getType())) {
-                final int indexToRemove = delta.getSource().getPosition();
+        Delta delta = DeltaDeterminationEngineLogic.determine(buildup, newHTMLLayers);
+        if(delta != null) {
+            if(delta.isDelete()) {
+                final int indexToRemove = delta.getPosition();
                 final HTMLLayer layerToRemove = buildup.get(indexToRemove);
 
                 buildup.remove(layerToRemove);
                 return ServerSideDiff.buildRemoval(layerToRemove);
-            } else if(DeltaType.INSERT.equals(delta.getType())) {
-                HTMLLayer layerToAdd = delta.getTarget().getLines().get(0);
+            } else if(delta.isInsert()) {
+                HTMLLayer layerToAdd = delta.getLayer();
                 layerToAdd = layerToAdd.cloneAndPruneContentIntoTagOnly();
-                int indexPosition = delta.getSource().getPosition();
+                int indexPosition = delta.getPosition();
 
                 final ServerSideDiff diff;
 

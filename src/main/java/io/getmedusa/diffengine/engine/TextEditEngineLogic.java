@@ -1,7 +1,7 @@
 package io.getmedusa.diffengine.engine;
 
-import io.getmedusa.diffengine.diff.ServerSideDiff;
-import io.getmedusa.diffengine.diff.TextNode;
+import io.getmedusa.diffengine.model.ServerSideDiff;
+import io.getmedusa.diffengine.model.meta.TextNode;
 import io.getmedusa.diffengine.model.HTMLLayer;
 import org.joox.JOOX;
 
