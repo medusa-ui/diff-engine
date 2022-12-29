@@ -1,6 +1,6 @@
 package io.getmedusa.diffengine.engine;
 
-import io.getmedusa.diffengine.model.Delta;
+import io.getmedusa.diffengine.model.meta.Delta;
 import io.getmedusa.diffengine.model.HTMLLayer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

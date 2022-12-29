@@ -1,6 +1,8 @@
 package io.getmedusa.diffengine.model;
 
-import io.getmedusa.diffengine.model.ServerSideDiff;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import static io.getmedusa.diffengine.model.AbstractDiff.DiffType.*;
 
 public abstract class AbstractDiff {
 
@@ -32,18 +34,35 @@ public abstract class AbstractDiff {
         return type.name();
     }
 
+
+    @JsonIgnore
+    public boolean isAddition() {
+        return this.type.equals(ADDITION);
+    }
+
+    @JsonIgnore
+    public boolean isRemoval()  {
+        return this.type.equals(REMOVAL);
+    }
+
+    @JsonIgnore
+    public boolean isAttrChange()   {
+        return this.type.equals(ATTR_CHANGE);
+    }
+
+    @JsonIgnore
+    public boolean isTextEdit()   {
+        return this.type.equals(TEXT_EDIT);
+    }
+
     public enum DiffType {
         //main structure
         ADDITION,
         REMOVAL,
-        EDIT,
+        TEXT_EDIT,
+        ATTR_CHANGE,
 
         //extras
         REDIRECT, JS_FUNCTION, LOADING
-
-        /*,
-        ATTR_CHANGE,
-        TAG_CHANGE,
-        SEQUENCE_CHANGE*/
     }
 }

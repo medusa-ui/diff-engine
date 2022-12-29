@@ -6,8 +6,7 @@ import org.joox.Match;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
-import java.util.LinkedList;
-import java.util.Objects;
+import java.util.*;
 
 public class HTMLLayer {
 
@@ -16,12 +15,14 @@ public class HTMLLayer {
 
     private final String parentXpath;
     private final LinkedList<TextNode> textNodes = new LinkedList<>();
+    private final Map<String, String> attributes = new HashMap<>();
 
     public HTMLLayer(Match $child) {
         this.content = $child.toString();
         this.xpath = $child.xpath();
         this.parentXpath = $child.parent().xpath();
         determineIfHasTextNodes($child);
+        determineAttributes($child);
     }
 
     @Deprecated
@@ -31,7 +32,7 @@ public class HTMLLayer {
         this.parentXpath = parentXpath;
     }
 
-    private boolean determineIfHasTextNodes(Match match) {
+    private void determineIfHasTextNodes(Match match) {
         int textIndex = 0;
         for (var element : match) {
             final NodeList childNodes = element.getChildNodes();
@@ -42,7 +43,16 @@ public class HTMLLayer {
                 }
             }
         }
-        return false;
+    }
+
+    private void determineAttributes(Match $child) {
+        for(var elem : $child.get()) {
+            var attrNodes = elem.getAttributes();
+            for (int i = 0; i < attrNodes.getLength(); i++) {
+                var node = attrNodes.item(i);
+                attributes.put(node.getNodeName(), node.getNodeValue());
+            }
+        }
     }
 
     public LinkedList<TextNode> getTextNodes() {
@@ -75,6 +85,10 @@ public class HTMLLayer {
 
     public String getParentXpath() {
         return parentXpath;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
     }
 
     @Override

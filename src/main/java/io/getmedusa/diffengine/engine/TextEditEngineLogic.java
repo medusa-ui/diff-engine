@@ -1,8 +1,8 @@
 package io.getmedusa.diffengine.engine;
 
+import io.getmedusa.diffengine.model.HTMLLayer;
 import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.model.meta.TextNode;
-import io.getmedusa.diffengine.model.HTMLLayer;
 import org.joox.JOOX;
 
 import java.util.LinkedHashSet;
@@ -13,7 +13,7 @@ public class TextEditEngineLogic {
 
     private TextEditEngineLogic() {}
 
-    public static LinkedHashSet<ServerSideDiff> handleTextEdits(List<HTMLLayer> newHTMLLayers, LinkedList<HTMLLayer> buildup) {
+    public static LinkedHashSet<ServerSideDiff> handleTextEdits(List<HTMLLayer> newHTMLLayers, List<HTMLLayer> buildup) {
         LinkedHashSet<ServerSideDiff> diffs = new LinkedHashSet<>();
 
         //can only be a removal if it was in the original and not in the new ones anymore

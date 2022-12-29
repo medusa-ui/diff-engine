@@ -1,6 +1,5 @@
 package io.getmedusa.diffengine.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.getmedusa.diffengine.model.meta.TextNode;
 
@@ -15,6 +14,9 @@ public class ServerSideDiff extends AbstractDiff {
 
     private String xpath;
 
+    private String attributeKey;
+    private String attributeValue;
+
     public ServerSideDiff(DiffType type) {
         super(type);
     }
@@ -22,7 +24,6 @@ public class ServerSideDiff extends AbstractDiff {
     public ServerSideDiff(String content, DiffType type) {
         super(content, type);
     }
-
 
     public String getContent() {
         return content;
@@ -64,23 +65,33 @@ public class ServerSideDiff extends AbstractDiff {
         this.xpath = xpath;
     }
 
-    @JsonIgnore
-    public boolean isAddition() {
-        return this.type.equals(ADDITION);
+    public String getAttributeKey() {
+        return attributeKey;
     }
 
-    @JsonIgnore
-    public boolean isRemoval()  {
-        return this.type.equals(REMOVAL);
+    public void setAttributeKey(String attributeKey) {
+        this.attributeKey = attributeKey;
     }
 
-    @JsonIgnore
-    public boolean isEdit() {
-        return this.type.equals(EDIT);
+    public String getAttributeValue() {
+        return attributeValue;
+    }
+
+    public void setAttributeValue(String attributeValue) {
+        this.attributeValue = attributeValue;
+    }
+
+
+    public static ServerSideDiff buildAttrChange(String xpath, String key, String value) {
+        ServerSideDiff diff = new ServerSideDiff(ATTR_CHANGE);
+        diff.setXpath(xpath);
+        diff.setAttributeKey(key);
+        diff.setAttributeValue(value);
+        return diff;
     }
 
     public static ServerSideDiff buildEdit(TextNode e) {
-        ServerSideDiff diff = new ServerSideDiff(EDIT);
+        ServerSideDiff diff = new ServerSideDiff(TEXT_EDIT);
         diff.setContent(e.getContent());
         diff.setXpath(e.getXpath());
         return diff;
@@ -161,6 +172,7 @@ public class ServerSideDiff extends AbstractDiff {
                 ((in != null) ? (", in='" + in + '\'') : "") +
                 '}';
     }
+
 
 
 }

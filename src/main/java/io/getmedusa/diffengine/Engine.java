@@ -1,5 +1,6 @@
 package io.getmedusa.diffengine;
 
+import io.getmedusa.diffengine.engine.AttrChangeEngineLogic;
 import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.engine.HTMLLayerBuildupEngineLogic;
 import io.getmedusa.diffengine.engine.RecursiveDiffEngineLogic;
@@ -18,13 +19,14 @@ public class Engine {
         layers.addAll(newHTMLLayersMap.keySet());
 
         Set<ServerSideDiff> diffs = new LinkedHashSet<>();
-        Set<ServerSideDiff> diffsText = new LinkedHashSet<>();
+        Set<ServerSideDiff> delayedDiffs = new LinkedHashSet<>();
         for(int layer : layers) {
             var diffsForOneLayerArray = calculateForLayer(oldHTMLLayersMap, newHTMLLayersMap, layer);
             diffs.addAll(diffsForOneLayerArray[0]);
-            diffsText.addAll(diffsForOneLayerArray[1]); //delayed add; you first want to have completed all layer structures before adding text changes
+            delayedDiffs.addAll(diffsForOneLayerArray[1]); //delayed add; you first want to have completed all layer structures before adding text changes
+            delayedDiffs.addAll(diffsForOneLayerArray[2]); //same for adding attr changes
         }
-        diffs.addAll(diffsText);
+        diffs.addAll(delayedDiffs);
         return diffs;
     }
 
@@ -49,7 +51,11 @@ public class Engine {
             }
         }
 
-        return new LinkedHashSet[]{diffs, TextEditEngineLogic.handleTextEdits(newHTMLLayers, buildup)};
+        return new LinkedHashSet[]{
+                diffs,
+                TextEditEngineLogic.handleTextEdits(newHTMLLayers, buildup),
+                AttrChangeEngineLogic.handleAttrEdits(newHTMLLayers, buildup)
+        };
     }
 
     /**

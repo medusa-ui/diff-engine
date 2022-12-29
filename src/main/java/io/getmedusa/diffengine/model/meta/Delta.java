@@ -1,4 +1,6 @@
-package io.getmedusa.diffengine.model;
+package io.getmedusa.diffengine.model.meta;
+
+import io.getmedusa.diffengine.model.HTMLLayer;
 
 public class Delta {
 

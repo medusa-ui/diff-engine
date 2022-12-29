@@ -3,6 +3,7 @@ package io.getmedusa.diffengine.testengine;
 import io.getmedusa.diffengine.Engine;
 import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.testengine.meta.DiffEngineTestAdditionLogic;
+import io.getmedusa.diffengine.testengine.meta.DiffEngineTestAttrChangeLogic;
 import io.getmedusa.diffengine.testengine.meta.DiffEngineTestEditLogic;
 import io.getmedusa.diffengine.testengine.meta.DiffEngineTestRemovalLogic;
 import org.jsoup.Jsoup;
@@ -25,7 +26,6 @@ public abstract class DiffEngineTest {
         Document html = Jsoup.parse(oldHTML);
 
         for(ServerSideDiff diff : diffs) {
-            //System.out.println();
             //System.out.println(diff);
             html = applyDiff(html, diff);
         }
@@ -36,7 +36,15 @@ public abstract class DiffEngineTest {
     }
 
     private String prettyPrint(String dirty) {
-        final Document document = Jsoup.parse(dirty.replace(" ", "").replace("\n", ""));
+        dirty = dirty
+                .replace("\r", "")
+                .replace("\n", "")
+                .replace("\t", "");
+        while(dirty.contains("  ")) {
+            dirty = dirty.replace("  ", " ");
+        }
+        dirty = dirty.replace("> <", "><");
+        final Document document = Jsoup.parse(dirty);
         document.outputSettings().prettyPrint(true);
         document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
         return document.body().outerHtml();
@@ -47,8 +55,10 @@ public abstract class DiffEngineTest {
             return DiffEngineTestAdditionLogic.applyAddition(html, diff);
         } else if(diff.isRemoval()) {
             return DiffEngineTestRemovalLogic.applyRemoval(html, diff);
-        } else if(diff.isEdit()) {
+        } else if(diff.isTextEdit()) {
             return DiffEngineTestEditLogic.applyEdit(html, diff);
+        } else if(diff.isAttrChange()) {
+            return DiffEngineTestAttrChangeLogic.applyAttrEdit(html, diff);
         }
         return html;
     }
