@@ -1,5 +1,6 @@
 package io.getmedusa.diffengine;
 
+import io.getmedusa.diffengine.engine.HTMLLayerBuildupEngineLogic;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -7,7 +8,7 @@ class RecursiveLayerInterpretationTest {
 
     @Test
     void testSimpleLayer() {
-        var layers = Engine.interpretLayer("<section><p></p></section>");
+        var layers = HTMLLayerBuildupEngineLogic.interpretLayer("<section><p></p></section>");
         Assertions.assertEquals(3, layers.keySet().size());
         Assertions.assertEquals(1, layers.get(1).size()); //body
         Assertions.assertEquals(1, layers.get(2).size()); //section
@@ -18,7 +19,7 @@ class RecursiveLayerInterpretationTest {
 
     @Test
     void testSimpleLayer2() {
-        var layers = Engine.interpretLayer("<section><p>A</p><div><p>2</p></div><p>B</p></section>");
+        var layers = HTMLLayerBuildupEngineLogic.interpretLayer("<section><p>A</p><div><p>2</p></div><p>B</p></section>");
         Assertions.assertEquals(4, layers.keySet().size());
         Assertions.assertEquals(1, layers.get(1).size()); //body
         Assertions.assertEquals(1, layers.get(2).size()); //section
@@ -31,7 +32,7 @@ class RecursiveLayerInterpretationTest {
 
     @Test
     void testSimpleLayer3() {
-        var layers = Engine.interpretLayer("<section><div><p></p></div></section>");
+        var layers = HTMLLayerBuildupEngineLogic.interpretLayer("<section><div><p></p></div></section>");
         Assertions.assertEquals(4, layers.keySet().size());
         Assertions.assertEquals(1, layers.get(1).size()); //body
         Assertions.assertEquals(1, layers.get(2).size()); //section
@@ -44,7 +45,7 @@ class RecursiveLayerInterpretationTest {
 
     @Test
     void testSimpleLayer4() {
-        var layers = Engine.interpretLayer("<section><div><p></p><p></p></div></section>");
+        var layers = HTMLLayerBuildupEngineLogic.interpretLayer("<section><div><p></p><p></p></div></section>");
         Assertions.assertEquals(4, layers.keySet().size());
         Assertions.assertEquals(1, layers.get(1).size()); //body
         Assertions.assertEquals(1, layers.get(2).size()); //section
@@ -57,7 +58,7 @@ class RecursiveLayerInterpretationTest {
 
     @Test
     void testMultiLayer() {
-        var layers = Engine.interpretLayer("<outer><section><p></p></section><div><p></p></div></outer>");
+        var layers = HTMLLayerBuildupEngineLogic.interpretLayer("<outer><section><p></p></section><div><p></p></div></outer>");
         Assertions.assertEquals(4, layers.keySet().size());
         Assertions.assertEquals(1, layers.get(1).size()); //body
         Assertions.assertEquals(1, layers.get(2).size()); //outer

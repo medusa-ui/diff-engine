@@ -17,7 +17,7 @@ public class RecursiveDiffEngineLogic {
         Patch<HTMLLayer> patch = DiffUtils.diff(buildup, newHTMLLayers);
         if(!patch.getDeltas().isEmpty()) {
             var delta = patch.getDeltas().get(0);
-            System.out.println(delta);
+            //System.out.println(delta);
 
             if(DeltaType.DELETE.equals(delta.getType()) || DeltaType.CHANGE.equals(delta.getType())) {
                 final int indexToRemove = delta.getSource().getPosition();
