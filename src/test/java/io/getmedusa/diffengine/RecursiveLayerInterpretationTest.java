@@ -13,8 +13,8 @@ class RecursiveLayerInterpretationTest {
         Assertions.assertEquals(1, layers.get(1).size()); //body
         Assertions.assertEquals(1, layers.get(2).size()); //section
         Assertions.assertEquals(1, layers.get(3).size()); //p
-        System.out.println(layers.get(1));
-        System.out.println(layers.get(2));
+        //System.out.println(layers.get(1));
+        //System.out.println(layers.get(2));
     }
 
     @Test
@@ -25,9 +25,9 @@ class RecursiveLayerInterpretationTest {
         Assertions.assertEquals(1, layers.get(2).size()); //section
         Assertions.assertEquals(3, layers.get(3).size()); //(section>)p, (section>)div, (section>)p
         Assertions.assertEquals(1, layers.get(4).size()); //(div>)p
-        System.out.println(layers.get(2));
-        System.out.println(layers.get(3));
-        System.out.println(layers.get(4));
+        //System.out.println(layers.get(2));
+        //System.out.println(layers.get(3));
+        //System.out.println(layers.get(4));
     }
 
     @Test
@@ -38,9 +38,9 @@ class RecursiveLayerInterpretationTest {
         Assertions.assertEquals(1, layers.get(2).size()); //section
         Assertions.assertEquals(1, layers.get(3).size()); //(section>)div
         Assertions.assertEquals(1, layers.get(4).size()); //(div>)p
-        System.out.println(layers.get(2));
-        System.out.println(layers.get(3));
-        System.out.println(layers.get(4));
+        //System.out.println(layers.get(2));
+        //System.out.println(layers.get(3));
+        //System.out.println(layers.get(4));
     }
 
     @Test
@@ -51,9 +51,9 @@ class RecursiveLayerInterpretationTest {
         Assertions.assertEquals(1, layers.get(2).size()); //section
         Assertions.assertEquals(1, layers.get(3).size()); //(section>)div
         Assertions.assertEquals(2, layers.get(4).size()); //(div>)p, (div>)p
-        System.out.println(layers.get(2));
-        System.out.println(layers.get(3));
-        System.out.println(layers.get(4));
+        //System.out.println(layers.get(2));
+        //System.out.println(layers.get(3));
+        //System.out.println(layers.get(4));
     }
 
     @Test
@@ -64,8 +64,8 @@ class RecursiveLayerInterpretationTest {
         Assertions.assertEquals(1, layers.get(2).size()); //outer
         Assertions.assertEquals(2, layers.get(3).size()); //(outer>)section, (outer>)div
         Assertions.assertEquals(2, layers.get(4).size()); //(section>)p, (div>)p
-        System.out.println(layers.get(2));
-        System.out.println(layers.get(3));
-        System.out.println(layers.get(4));
+        //System.out.println(layers.get(2));
+        //System.out.println(layers.get(3));
+        //System.out.println(layers.get(4));
     }
 }

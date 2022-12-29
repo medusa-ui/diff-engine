@@ -69,7 +69,7 @@ class DiffEngineTest extends DiffEngineJSoup {
         final List<JSReadyDiff> jsReadyDiffs = getDiffs(oldHTML, newHTML);
 
         for(JSReadyDiff diff : jsReadyDiffs) {
-            System.out.println(diff);
+            //System.out.println(diff);
         }
 
         Assertions.assertEquals( 1, jsReadyDiffs.size(), "expected only 1 edit");
@@ -89,21 +89,21 @@ class DiffEngineTest extends DiffEngineJSoup {
         final List<JSReadyDiff> listOf = getDiffs(oldHTML, newHTML);
 
         final JSReadyDiff jsReadyDiff1 = listOf.get(0);
-        System.out.println(jsReadyDiff1);
+        //System.out.println(jsReadyDiff1);
         Assertions.assertNotNull(jsReadyDiff1);
         Assertions.assertTrue(jsReadyDiff1.toString().contains("type=ADDITION"));
         Assertions.assertEquals("/html[1]/table[1]/tr[1]/td[2]", jsReadyDiff1.getXpath());
         Assertions.assertEquals("<td>3</td>", jsReadyDiff1.getContent());
 
         final JSReadyDiff jsReadyDiff2 = listOf.get(1);
-        System.out.println(jsReadyDiff2);
+        //System.out.println(jsReadyDiff2);
         Assertions.assertNotNull(jsReadyDiff2);
         Assertions.assertTrue(jsReadyDiff2.toString().contains("type=ADDITION"));
         Assertions.assertEquals("/html[1]/table[1]/tr[1]/td[3]", jsReadyDiff2.getXpath());
         Assertions.assertEquals("<td>4</td>", jsReadyDiff2.getContent());
 
         final JSReadyDiff jsReadyDiff3 = listOf.get(2);
-        System.out.println(jsReadyDiff3);
+        //System.out.println(jsReadyDiff3);
         Assertions.assertNotNull(jsReadyDiff3);
         Assertions.assertTrue(jsReadyDiff3.toString().contains("type=ADDITION"));
         Assertions.assertEquals("/html[1]/::first", jsReadyDiff3.getXpath());
@@ -170,7 +170,7 @@ class DiffEngineTest extends DiffEngineJSoup {
 
         final List<JSReadyDiff> jsReadyDiffsFinal = new ArrayList<>();
         for(JSReadyDiff diff : jsReadyDiffs2) {
-            System.out.println(diff);
+            //System.out.println(diff);
             if(!diff.isSequenceChange()) {
                 jsReadyDiffsFinal.add(diff);
             }
@@ -181,7 +181,7 @@ class DiffEngineTest extends DiffEngineJSoup {
 
     private List<JSReadyDiff> getDiffs(String oldHTML, String newHTML) {
         final List<JSReadyDiff> jsReadyDiffs = new LinkedList<>(engine.calculate(oldHTML, newHTML));
-        System.out.println(jsReadyDiffs);
+        //System.out.println(jsReadyDiffs);
         return jsReadyDiffs;
     }
 

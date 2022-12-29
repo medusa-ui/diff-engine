@@ -1,6 +1,6 @@
 package io.getmedusa.diffengine.model;
 
-import io.getmedusa.diffengine.diff.TextNode;
+import io.getmedusa.diffengine.model.meta.TextNode;
 import org.joox.JOOX;
 import org.joox.Match;
 import org.w3c.dom.NodeList;
@@ -24,7 +24,8 @@ public class HTMLLayer {
         determineIfHasTextNodes($child);
     }
 
-    private HTMLLayer(String content, String xpath, String parentXpath) {
+    @Deprecated
+    public HTMLLayer(String content, String xpath, String parentXpath) {
         this.content = content;
         this.xpath = xpath;
         this.parentXpath = parentXpath;

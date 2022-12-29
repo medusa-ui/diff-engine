@@ -1,6 +1,6 @@
 package io.getmedusa.diffengine;
 
-import io.getmedusa.diffengine.diff.ServerSideDiff;
+import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.engine.HTMLLayerBuildupEngineLogic;
 import io.getmedusa.diffengine.engine.RecursiveDiffEngineLogic;
 import io.getmedusa.diffengine.engine.TextEditEngineLogic;
@@ -64,7 +64,7 @@ public class Engine {
         List<HTMLLayer> layersToRemove = new ArrayList<>();
         for(HTMLLayer deeperLayer : deeperLayers) {
             if(deeperLayer.getParentXpath().equals(xpath)) {
-                System.out.println("Removed deeper layer: " + deeperLayer.getXpath());
+                //System.out.println("Removed deeper layer: " + deeperLayer.getXpath());
                 layersToRemove.add(deeperLayer);
                 removeDeeperElementsFromBuildup(deeperLayer.getXpath(), oldHTMLLayersMap, layer + 1);
             }
