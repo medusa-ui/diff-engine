@@ -49,7 +49,17 @@ public class RecursiveDiffEngineLogic {
                     }
                 } else {
                     //linkBefore(layerToAdd, node(indexPosition));
-                    diff = ServerSideDiff.buildNewBeforeDiff(layerToAdd, buildup.get(indexPosition));
+                    //if you want to insert a /body[1]/section[1]/div[1]/p[1]
+                    //but the buildup layers are /body[1]/section[1]/h5[1]/code[1]
+                    //then adding 'before' isn't good enough, you need to get into the right xpath
+                    //otherwise you end up WITHIN h5[1], which is not the intention according to the XPATH
+                    //this might instead be a better IN for your parent pom
+                    final HTMLLayer lastLayerMatchingXPathParent = getLastLayerMatchingXPathParent(buildup, layerToAdd);
+                    if(lastLayerMatchingXPathParent != null) {
+                        diff = ServerSideDiff.buildNewBeforeDiff(layerToAdd, buildup.get(indexPosition));
+                    } else { //and should there not be one of those, we do an in
+                        diff = ServerSideDiff.buildInDiff(layerToAdd);
+                    }
                 }
 
                 buildup.add(indexPosition, layerToAdd);

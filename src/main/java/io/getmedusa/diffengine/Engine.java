@@ -22,7 +22,7 @@ public class Engine {
         for(int layer : layers) {
             var diffsForOneLayerArray = calculateForLayer(oldHTMLLayersMap, newHTMLLayersMap, layer);
             diffs.addAll(diffsForOneLayerArray[0]);
-            diffsText.addAll(diffsForOneLayerArray[1]); //delayed add; you first want to have completed a layer's structure before adding text changes
+            diffsText.addAll(diffsForOneLayerArray[1]); //delayed add; you first want to have completed all layer structures before adding text changes
         }
         diffs.addAll(diffsText);
         return diffs;
