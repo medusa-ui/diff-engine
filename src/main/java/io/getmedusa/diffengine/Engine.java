@@ -64,7 +64,7 @@ public class Engine {
         List<HTMLLayer> layersToRemove = new ArrayList<>();
         for(HTMLLayer deeperLayer : deeperLayers) {
             if(deeperLayer.getParentXpath().equals(xpath)) {
-                System.out.println("Removed deeper layer: " + deeperLayer.getXpath());
+                //System.out.println("Removed deeper layer: " + deeperLayer.getXpath());
                 layersToRemove.add(deeperLayer);
                 removeDeeperElementsFromBuildup(deeperLayer.getXpath(), oldHTMLLayersMap, layer + 1);
             }

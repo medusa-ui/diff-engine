@@ -25,13 +25,21 @@ public abstract class DiffEngineTest {
         Document html = Jsoup.parse(oldHTML);
 
         for(ServerSideDiff diff : diffs) {
-            System.out.println(diff);
+            //System.out.println();
+            //System.out.println(diff);
             html = applyDiff(html, diff);
         }
 
         Document expectedHTML = Jsoup.parse(newHTML);
 
-        Assertions.assertEquals(expectedHTML.outerHtml().replace(" ", ""), html.outerHtml().replace(" ", ""),"Rebuilt HTML and expected HTML do not match");
+        Assertions.assertEquals(prettyPrint(expectedHTML.outerHtml()), prettyPrint(html.outerHtml()),"Rebuilt HTML and expected HTML do not match");
+    }
+
+    private String prettyPrint(String dirty) {
+        final Document document = Jsoup.parse(dirty.replace(" ", "").replace("\n", ""));
+        document.outputSettings().prettyPrint(true);
+        document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+        return document.body().outerHtml();
     }
 
     private Document applyDiff(Document html, ServerSideDiff diff) {

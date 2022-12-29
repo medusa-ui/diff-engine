@@ -15,7 +15,7 @@ class ServerSideDiffSerializerTest {
     void testSerialization() throws JsonProcessingException {
         var diff = ServerSideDiff.buildNewBeforeDiff(new HTMLLayer(JOOX.$("<p/>")), new HTMLLayer(JOOX.$("<p/>")));
         final String json = mapper.writeValueAsString(diff);
-        System.out.println(json);
+        //System.out.println(json);
     }
 
 }

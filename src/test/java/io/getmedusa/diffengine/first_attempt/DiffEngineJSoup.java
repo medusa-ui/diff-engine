@@ -78,7 +78,7 @@ public class DiffEngineJSoup {
         Map<JSReadyDiff, Element> elementMap = new HashMap<>();
         var parsedHTMLForLookups = Jsoup.parse(oldHTML);
 
-        System.out.println("Initial HTML: \n" + parsedHTMLForLookups.getElementsByTag("section").get(0).outerHtml());
+        //System.out.println("Initial HTML: \n" + parsedHTMLForLookups.getElementsByTag("section").get(0).outerHtml());
 
         //prep sequences first
         for(JSReadyDiff diff : jsReadyDiffs) {
@@ -97,10 +97,10 @@ public class DiffEngineJSoup {
         for(JSReadyDiff diff : jsReadyDiffs) {
             oldHTML = applyDiff(oldHTML, diff, elementMap);
 
-            System.out.println("---");
-            System.out.println("Applied: " + diff);
-            System.out.println("New HTML:  \n" + noUUIDs(oldHTML));
-            System.out.println("---");
+            //System.out.println("---");
+            //System.out.println("Applied: " + diff);
+            //System.out.println("New HTML:  \n" + noUUIDs(oldHTML));
+            //System.out.println("---");
         }
 
         Assertions.assertEquals(pretty(newHTML), pretty(oldHTML));

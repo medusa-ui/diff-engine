@@ -49,12 +49,22 @@ public class RecursiveDiffEngineLogic {
                     //then adding 'before' isn't good enough, you need to get into the right xpath
                     //otherwise you end up WITHIN h5[1], which is not the intention according to the XPATH
                     //this might instead be a better IN for your parent pom
-                    final HTMLLayer lastLayerMatchingXPathParent = getLastLayerMatchingXPathParent(buildup, layerToAdd);
-                    if(lastLayerMatchingXPathParent != null) {
-                        diff = ServerSideDiff.buildNewBeforeDiff(layerToAdd, buildup.get(indexPosition));
-                    } else { //and should there not be one of those, we do an in
-                        diff = ServerSideDiff.buildInDiff(layerToAdd);
-                    }
+
+                        //decide of before or after
+                        //before = index position
+                        //after = index position - 1
+                        //depends on parent xpath matching
+                        //if no match, then 'in'
+
+                        if(layerToAdd.getParentXpath().equals(buildup.get(indexPosition).getParentXpath())) {
+                            diff = ServerSideDiff.buildNewBeforeDiff(layerToAdd, buildup.get(indexPosition));
+                        } else {
+                            if(indexPosition != 0 && layerToAdd.getParentXpath().equals(buildup.get(indexPosition - 1).getParentXpath())) {
+                                diff = ServerSideDiff.buildNewAfterDiff(layerToAdd, buildup.get(indexPosition-1));
+                            } else {
+                                diff = ServerSideDiff.buildInDiff(layerToAdd);
+                            }
+                        }
                 }
 
                 buildup.add(indexPosition, layerToAdd);
