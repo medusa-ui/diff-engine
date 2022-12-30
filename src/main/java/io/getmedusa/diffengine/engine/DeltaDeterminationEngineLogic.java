@@ -3,6 +3,8 @@ package io.getmedusa.diffengine.engine;
 import io.getmedusa.diffengine.model.meta.Delta;
 import io.getmedusa.diffengine.model.HTMLLayer;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class DeltaDeterminationEngineLogic {
@@ -14,7 +16,9 @@ public class DeltaDeterminationEngineLogic {
         //removals
         //ie in old but not in new
         //loop over old, if respective one not in new, then a removal
-        for(var oldHTMLLayer : oldHTMLLayers) {
+        List<HTMLLayer> reverseOldHTMLLayers = new LinkedList<>(oldHTMLLayers);
+        Collections.reverse(reverseOldHTMLLayers);
+        for(var oldHTMLLayer : reverseOldHTMLLayers) {
             if(!newHTMLLayers.contains(oldHTMLLayer)) {
                 return Delta.deletionDelta(oldHTMLLayer, oldHTMLLayers.indexOf(oldHTMLLayer));
             }

@@ -55,6 +55,17 @@ class OneLayerSimpleRemovalTest extends DiffEngineTest {
                             <p>HELLO</p>
                         </section>
                         """
+                ), Arguments.of(
+                        """
+                        <section>
+                            <p>HELLO</p>
+                            <p>World</p>
+                        </section>
+                                   """,
+                        """
+                        <section>
+                        </section>
+                        """
                 ));
     }
 
