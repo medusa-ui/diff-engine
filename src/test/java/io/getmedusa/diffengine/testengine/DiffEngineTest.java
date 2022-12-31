@@ -18,16 +18,26 @@ public abstract class DiffEngineTest {
 
     protected static final Engine engine = new Engine();
 
-    protected void applyAndTest(String oldHTML, String newHTML, Set<ServerSideDiff> diffSet) {
+    protected void applyAndTest(String oldHTML, String newHTML, Set<ServerSideDiff> diffSet){
+        applyAndTest(oldHTML, newHTML, diffSet,false);
+    }
+
+    protected void applyAndTest(String oldHTML, String newHTML, Set<ServerSideDiff> diffSet, boolean traceAppliedDiffs) {
         Assertions.assertNotNull(diffSet, "Expected at least 1 diff");
         List<ServerSideDiff> diffs = new LinkedList<>(diffSet);
         Assertions.assertTrue(diffs.size() >= 1, "Expected at least 1 diff");
 
         Document html = Jsoup.parse(oldHTML);
-
+        if(traceAppliedDiffs) {
+            System.out.println("\nHTML:\n"+html+"\n");
+            System.out.println("Diffs to apply");
+            diffs.forEach(System.out::println);
+        }
         for(ServerSideDiff diff : diffs) {
-            //System.out.println(diff);
             html = applyDiff(html, diff);
+            if(traceAppliedDiffs) {
+                System.out.println("\nApplied diff: " + diff + "\n" + html );
+            }
         }
 
         Document expectedHTML = Jsoup.parse(newHTML);

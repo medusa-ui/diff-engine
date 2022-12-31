@@ -9,6 +9,8 @@ public class DiffEngineTestRemovalLogic extends DiffEngineTestLogic {
         final Node node = xpathWithoutVerify(html, diff.getXpath());
         if(node != null) {
             node.remove();
+        } else {
+            System.err.printf("DiffEngineTestRemovalLogic.applyRemoval could not find node!\nxpath: '%s' in  \nhtml:\n%s%n", diff.getXpath(), html);
         }
         return html;
     }

@@ -219,7 +219,7 @@ class ComplexTest extends DiffEngineTest {
         """;
 
         Set<ServerSideDiff> diffs = engine.calculate(oldHTML, newHTML);
-        applyAndTest(oldHTML, newHTML, diffs);
+        applyAndTest(oldHTML, newHTML, diffs, true);
     }
 
     @Test
@@ -477,7 +477,7 @@ class ComplexTest extends DiffEngineTest {
                 """;
 
         Set<ServerSideDiff> diffs = engine.calculate(oldHTML, newHTML);
-        applyAndTest(oldHTML, newHTML, diffs);
+        applyAndTest(oldHTML, newHTML, diffs, true);
     }
 
     @Test

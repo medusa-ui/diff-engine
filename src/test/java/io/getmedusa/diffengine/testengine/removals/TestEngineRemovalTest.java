@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
- * This test, tests the test engine more. It failing means we won't be able to properly test the engine itself.
+ * This test, tests the test engine more. Failing means that we won't be able to properly test the engine itself.
  * The implementation should be reflected in JS.
  */
 class TestEngineRemovalTest extends DiffEngineTest {
