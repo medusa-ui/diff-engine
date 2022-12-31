@@ -14,13 +14,13 @@ public class SequentialTest extends DiffEngineTest {
 
     String template = """
             <section>
-                <div id="top_top" th:if="${top}">top <code>top</code></div>
-                <p id="top_mid" th:if="${mid}">mid <code>top</code></p>
-                <p id="top_down" th:if="${down}">down <code>top</code></p>
+                <div id="top_top" th:if="${top}">on <code>top</top> on <code>top</code> of the button</div>
+                <p id="top_mid" th:if="${mid}"> at <code>mid</code> on <code>top</code> of the button</p>
+                <div><p id="top_down" th:if="${down}">must be <code>down</code>, but on <code>top</code> of the button</p></div>
                 <button id="always">always there</button>
-                <div id="down_top" th:if="${top}">top <code>down</code></div>
-                <p id="down_mid" th:if="${mid}">mid <code>down</code></p>
-                <p id="down_down" th:if="${down}">down <code>down</code></p>
+                <div id="down_top" th:if="${top}"><code>top</code> <code>down</code> the button</div>
+                <p id="down_mid" th:if="${mid}"><code>mid</code> <code>down</code>the button</p>
+                <div><p id="down_down" th:if="${down}">must last <code>down</code> and <code>down</code> the button</p></div>
             </section>
             """;
     List<List<Boolean>> booleans =
@@ -29,13 +29,17 @@ public class SequentialTest extends DiffEngineTest {
                     List.of(true, false, false),
                     List.of(false, false, false),
                     List.of(true, true, false),
+                    List.of(false, true, false),
+                    List.of(true, true, true),
                     List.of(false, true, false)
             );
 
     @Test
     void sequentialChanges(){
+        int run = 1;
         String start = rendered(true, true, true).html();
         for (List<Boolean> list : booleans) {
+            System.out.printf("run: %s with top: %s, mid: %s, down: %s\n", run++ ,list.get(0), list.get(1), list.get(2));
             start = sequentialTest(start, list.get(0), list.get(1), list.get(2), true);
         }
     }
