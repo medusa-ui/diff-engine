@@ -29,9 +29,9 @@ public abstract class DiffEngineTest {
 
         Document html = Jsoup.parse(oldHTML);
         if(traceAppliedDiffs) {
-            System.out.println("\nHTML:\n"+html+"\n");
             System.out.println("Diffs to apply");
             diffs.forEach(System.out::println);
+            System.out.println("\nHTML:\n"+html);
         }
         for(ServerSideDiff diff : diffs) {
             html = applyDiff(html, diff);
