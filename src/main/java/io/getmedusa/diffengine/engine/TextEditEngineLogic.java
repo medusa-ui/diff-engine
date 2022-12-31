@@ -78,7 +78,7 @@ public class TextEditEngineLogic {
             newTextNodes = new LinkedList<>();
         }
         var removals = new LinkedList<>(oldTextNodes);
-        Collections.reverse(removals);
+        Collections.reverse(removals); // do text() removals in reverse order
         newTextNodes.forEach(removals::remove);
         return new LinkedList<>(removals.stream().filter(r -> !r.getContent().trim().isBlank()).map(ServerSideDiff::buildRemoval).toList());
     }
