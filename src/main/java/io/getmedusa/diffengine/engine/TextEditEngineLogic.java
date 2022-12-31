@@ -5,6 +5,7 @@ import io.getmedusa.diffengine.model.ServerSideDiff;
 import io.getmedusa.diffengine.model.meta.TextNode;
 import org.joox.JOOX;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,6 +78,7 @@ public class TextEditEngineLogic {
             newTextNodes = new LinkedList<>();
         }
         var removals = new LinkedList<>(oldTextNodes);
+        Collections.reverse(removals);
         newTextNodes.forEach(removals::remove);
         return new LinkedList<>(removals.stream().filter(r -> !r.getContent().trim().isBlank()).map(ServerSideDiff::buildRemoval).toList());
     }
