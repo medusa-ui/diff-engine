@@ -134,6 +134,23 @@ class OneLayerSimpleAdditionsTest extends DiffEngineTest {
                             World
                         </section>
                         """
+                ), Arguments.of(
+                        """
+                        <section>
+                           <p></p>
+                           <span></span>
+                           <span></span>
+                           <p></p>
+                        </section>
+                        """,
+                        """
+                        <section>
+                           <p></p>
+                           <p></p>
+                           <span></span>
+                           <span></span>
+                        </section>
+                        """
                 ));
     }
 

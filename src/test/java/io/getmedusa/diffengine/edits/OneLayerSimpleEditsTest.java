@@ -23,7 +23,15 @@ class OneLayerSimpleEditsTest extends DiffEngineTest {
                             <p>Hello world</p>
                         </section>
                         """
-                ));
+                ), Arguments.of(
+                        """
+                           <p>hello <b>BIG</b> world</p>
+                        """,
+                        """
+                           <p>HELLO <b>big</b> WORLD</p>
+                        """
+                )
+        );
     }
 
     @ParameterizedTest
