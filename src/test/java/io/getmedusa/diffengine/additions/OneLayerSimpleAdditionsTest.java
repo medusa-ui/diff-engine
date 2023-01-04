@@ -134,6 +134,24 @@ class OneLayerSimpleAdditionsTest extends DiffEngineTest {
                             World
                         </section>
                         """
+                ), Arguments.of(
+                """
+                        <section>
+                           <p></p>
+                           <span></span>
+                           <span></span>
+                           <p></p>
+                        </section>
+                        """,
+                        """
+                        <section>
+                           <p></p>
+                           <p></p>
+                           <span></span>
+                           <span></span>
+                           <p></p>
+                        </section>
+                        """
                 ));
     }
 
@@ -141,6 +159,6 @@ class OneLayerSimpleAdditionsTest extends DiffEngineTest {
     @MethodSource("additionParameters")
     void testAdditions(String oldHTML, String newHTML) {
         Set<ServerSideDiff> diffs = engine.calculate(oldHTML, newHTML);
-        applyAndTest(oldHTML, newHTML, diffs);
+        applyAndTest(oldHTML, newHTML, diffs, true);
     }
 }
