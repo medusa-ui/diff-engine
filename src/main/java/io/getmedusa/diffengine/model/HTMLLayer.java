@@ -12,6 +12,7 @@ public class HTMLLayer {
 
     private final String content;
     private final String xpath;
+    private final int position;
 
     private final String parentXpath;
     private final LinkedList<TextNode> textNodes = new LinkedList<>();
@@ -21,15 +22,27 @@ public class HTMLLayer {
         this.content = $child.toString();
         this.xpath = $child.xpath();
         this.parentXpath = $child.parent().xpath();
+        this.position = determineNodePosition($child);
         determineIfHasTextNodes($child);
         determineAttributes($child);
     }
 
+    private int determineNodePosition(Match $child) {
+        final Match children = $child.parent().children();
+        for (int j = 0; j < children.size(); j++) {
+            if($child.get(0).equals(children.get(j))){
+                return j;
+            }
+        }
+        return 0;
+    }
+
     @Deprecated
-    public HTMLLayer(String content, String xpath, String parentXpath) {
+    public HTMLLayer(String content, String xpath, String parentXpath, int position) {
         this.content = content;
         this.xpath = xpath;
         this.parentXpath = parentXpath;
+        this.position = position;
     }
 
     private void determineIfHasTextNodes(Match match) {
@@ -67,12 +80,12 @@ public class HTMLLayer {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof HTMLLayer layer)) return false;
-        return getXpath().equals(layer.getXpath());
+        return position == layer.position && getXpath().equals(layer.getXpath());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getXpath());
+        return Objects.hash(getXpath(), position);
     }
 
     public String getContent() {
@@ -104,6 +117,6 @@ public class HTMLLayer {
         //I do not want additions to add deeper child nodes
         final Match match = JOOX.$(content);
         String newContent = "<" + match.tag() + "></" + match.tag() + ">";
-        return new HTMLLayer(newContent, xpath, parentXpath);
+        return new HTMLLayer(newContent, xpath, parentXpath, position);
     }
 }
