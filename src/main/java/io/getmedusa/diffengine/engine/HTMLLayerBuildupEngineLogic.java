@@ -16,13 +16,13 @@ public class HTMLLayerBuildupEngineLogic {
 
     private HTMLLayerBuildupEngineLogic() {}
 
-    private static Match initialParse(String html) {
+    static Match initialParse(String html) {
         //clear scripts, clear comments, etc
         final Document document = Jsoup.parse(html);
         removeComments(document);
         document.outputSettings().prettyPrint(false);
         document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
-        return JOOX.$(document.body().outerHtml());
+        return JOOX.$(document.body().outerHtml().replace("&", "&amp;"));
     }
 
     private static void removeComments(Node node) {
