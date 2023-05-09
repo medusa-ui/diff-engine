@@ -63,6 +63,6 @@ public abstract class AbstractDiff {
         ATTR_CHANGE,
 
         //extras
-        REDIRECT, JS_FUNCTION, LOADING
+        REDIRECT, JS_FUNCTION, LOADING, VALIDATION
     }
 }

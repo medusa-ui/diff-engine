@@ -81,7 +81,6 @@ public class ServerSideDiff extends AbstractDiff {
         this.attributeValue = attributeValue;
     }
 
-
     public static ServerSideDiff buildAttrChange(String xpath, String key, String value) {
         ServerSideDiff diff = new ServerSideDiff(ATTR_CHANGE);
         diff.setXpath(xpath);
@@ -158,6 +157,13 @@ public class ServerSideDiff extends AbstractDiff {
     public static ServerSideDiff buildRemoval(TextNode r) {
         ServerSideDiff diff = new ServerSideDiff(REMOVAL);
         diff.setXpath(r.getXpath());
+        return diff;
+    }
+
+    public static ServerSideDiff buildValidation(String field, String message) {
+        ServerSideDiff diff = new ServerSideDiff(VALIDATION);
+        diff.setAttributeKey(field);
+        diff.setAttributeValue(message);
         return diff;
     }
 
