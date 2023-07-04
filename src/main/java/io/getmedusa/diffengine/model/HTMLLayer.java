@@ -1,25 +1,29 @@
 package io.getmedusa.diffengine.model;
 
 import io.getmedusa.diffengine.model.meta.TextNode;
-import org.joox.JOOX;
 import org.joox.Match;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
 
 public class HTMLLayer {
 
-    private final String content;
+    private String contentCache;
     private final String xpath;
     private final int position;
+    private String tag;
 
     private final String parentXpath;
     private final LinkedList<TextNode> textNodes = new LinkedList<>();
     private final Map<String, String> attributes = new HashMap<>();
+    private Match match;
 
     public HTMLLayer(Match $child) {
-        this.content = $child.toString();
+        this.match = $child;
         this.xpath = $child.xpath();
         this.parentXpath = $child.parent().xpath();
         this.position = determineNodePosition($child);
@@ -38,11 +42,19 @@ public class HTMLLayer {
     }
 
     @Deprecated
-    public HTMLLayer(String content, String xpath, String parentXpath, int position) {
-        this.content = content;
+    public HTMLLayer(String tag, String content, String xpath, String parentXpath, int position) {
+        this.contentCache = content;
         this.xpath = xpath;
         this.parentXpath = parentXpath;
         this.position = position;
+        this.tag = tag;
+    }
+
+    public String getTag() {
+        if(tag == null) {
+            this.tag = match.tag();
+        }
+        return tag;
     }
 
     private void determineIfHasTextNodes(Match match) {
@@ -89,7 +101,10 @@ public class HTMLLayer {
     }
 
     public String getContent() {
-        return content;
+        if(contentCache == null) {
+            this.contentCache = match.toString();
+        }
+        return contentCache;
     }
 
     public String getXpath() {
@@ -107,16 +122,15 @@ public class HTMLLayer {
     @Override
     public String toString() {
         return "HTMLLayer{" +
-                "xpath='" + xpath + '\'' +
-                "content='" + content + '\'' +
-                ", parentXpath='" + parentXpath + '\'' +
+                "xpath='" + getXpath() + '\'' +
+                "content='" + getContent() + '\'' +
+                ", parentXpath='" + getParentXpath() + '\'' +
                 '}';
     }
 
     public HTMLLayer cloneAndPruneContentIntoTagOnly() {
         //I do not want additions to add deeper child nodes
-        final Match match = JOOX.$(content);
-        String newContent = "<" + match.tag() + "></" + match.tag() + ">";
-        return new HTMLLayer(newContent, xpath, parentXpath, position);
+        String newContent = "<" + getTag() + "></" + getTag() + ">";
+        return new HTMLLayer(getTag(), newContent, xpath, parentXpath, position);
     }
 }

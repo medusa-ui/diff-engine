@@ -39,7 +39,7 @@ class DeltaDeterminationTest {
     private List<HTMLLayer> layers(String... tags) {
         List<HTMLLayer> layers = new ArrayList<>();
         for(String tag : tags) {
-            layers.add(new HTMLLayer(null, toXPath(tag), null, 0));
+            layers.add(new HTMLLayer(tag, null, toXPath(tag), null, 0));
         }
         return layers;
     }
