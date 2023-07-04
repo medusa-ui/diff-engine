@@ -15,7 +15,7 @@ public class HTMLLayer {
     private String contentCache;
     private final String xpath;
     private final int position;
-    private final String tag;
+    private String tag;
 
     private final String parentXpath;
     private final LinkedList<TextNode> textNodes = new LinkedList<>();
@@ -27,7 +27,6 @@ public class HTMLLayer {
         this.xpath = $child.xpath();
         this.parentXpath = $child.parent().xpath();
         this.position = determineNodePosition($child);
-        this.tag = $child.tag();
         determineIfHasTextNodes($child);
         determineAttributes($child);
     }
@@ -49,6 +48,13 @@ public class HTMLLayer {
         this.parentXpath = parentXpath;
         this.position = position;
         this.tag = tag;
+    }
+
+    public String getTag() {
+        if(tag == null) {
+            this.tag = match.tag();
+        }
+        return tag;
     }
 
     private void determineIfHasTextNodes(Match match) {
@@ -116,15 +122,15 @@ public class HTMLLayer {
     @Override
     public String toString() {
         return "HTMLLayer{" +
-                "xpath='" + xpath + '\'' +
+                "xpath='" + getXpath() + '\'' +
                 "content='" + getContent() + '\'' +
-                ", parentXpath='" + parentXpath + '\'' +
+                ", parentXpath='" + getParentXpath() + '\'' +
                 '}';
     }
 
     public HTMLLayer cloneAndPruneContentIntoTagOnly() {
         //I do not want additions to add deeper child nodes
-        String newContent = "<" + tag + "></" + tag + ">";
-        return new HTMLLayer(tag, newContent, xpath, parentXpath, position);
+        String newContent = "<" + getTag() + "></" + getTag() + ">";
+        return new HTMLLayer(getTag(), newContent, xpath, parentXpath, position);
     }
 }
